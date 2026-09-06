@@ -1,0 +1,171 @@
+{
+  "comment": "시리즈 정의의 단일 진실 원천. app(src/lib/stat-codes.ts)과 scripts/fetch-snapshots.mjs이 함께 읽는다. 통계표/항목 코드는 2026-09 실제 호출로 확정한 값(PLAN.md 3.2절).",
+  "series": [
+    {
+      "key": "baseRate",
+      "label": "한국은행 기준금리",
+      "short": "기준금리",
+      "unit": "연%",
+      "table": "722Y001",
+      "item": "0101000",
+      "period": "M",
+      "start": "200001",
+      "source": "1.3.1 한국은행 기준금리 및 여수신금리"
+    },
+    {
+      "key": "tbond3y",
+      "label": "국고채(3년) 수익률",
+      "short": "국고채3년",
+      "unit": "연%",
+      "table": "817Y002",
+      "item": "010200000",
+      "period": "D",
+      "monthlyAvg": true,
+      "start": "20150101",
+      "source": "1.3.3.2 시장금리(일별)"
+    },
+    {
+      "key": "mortgage",
+      "label": "주택담보대출 금리(신규취급)",
+      "short": "주담대(신규)",
+      "unit": "연%",
+      "table": "121Y006",
+      "item": "BECBLA0302",
+      "period": "M",
+      "start": "200601",
+      "source": "1.3.3.2.1 예금은행 대출금리(신규취급액 기준)"
+    },
+    {
+      "key": "mortgageFixed",
+      "label": "고정형 주택담보대출 금리(신규취급)",
+      "short": "주담대 고정형",
+      "unit": "연%",
+      "table": "121Y006",
+      "item": "BECBLA030201",
+      "period": "M",
+      "start": "200601",
+      "source": "1.3.3.2.1 예금은행 대출금리(신규취급액 기준)"
+    },
+    {
+      "key": "mortgageVar",
+      "label": "변동형 주택담보대출 금리(신규취급)",
+      "short": "주담대 변동형",
+      "unit": "연%",
+      "table": "121Y006",
+      "item": "BECBLA030202",
+      "period": "M",
+      "start": "200601",
+      "source": "1.3.3.2.1 예금은행 대출금리(신규취급액 기준)"
+    },
+    {
+      "key": "credit",
+      "label": "일반신용대출 금리(신규취급)",
+      "short": "신용대출(신규)",
+      "unit": "연%",
+      "table": "121Y006",
+      "item": "BECBLA03051",
+      "period": "M",
+      "start": "200601",
+      "source": "1.3.3.2.1 예금은행 대출금리(신규취급액 기준)"
+    },
+    {
+      "key": "deposit",
+      "label": "정기예금(1년) 금리(신규취급)",
+      "short": "정기예금(1년)",
+      "unit": "연%",
+      "table": "121Y002",
+      "item": "BEABAA2118",
+      "period": "M",
+      "start": "200601",
+      "source": "1.3.3.1.1 예금은행 수신금리(신규취급액 기준)"
+    },
+    {
+      "key": "cpi",
+      "label": "소비자물가지수 총지수",
+      "short": "소비자물가",
+      "unit": "2020=100",
+      "table": "901Y009",
+      "item": "0",
+      "period": "M",
+      "start": "200001",
+      "source": "4.2.1 소비자물가지수(통계청)"
+    },
+    {
+      "key": "usdkrw",
+      "label": "원/미국달러 환율(월평균)",
+      "short": "원/달러",
+      "unit": "원",
+      "table": "731Y004",
+      "item": "0000001",
+      "period": "M",
+      "start": "200001",
+      "source": "3.1.2.1 주요국 통화의 대원화환율"
+    },
+    {
+      "key": "kospi",
+      "label": "KOSPI(월평균)",
+      "short": "KOSPI",
+      "unit": "2015=100",
+      "table": "902Y002",
+      "item": "KOR",
+      "period": "M",
+      "start": "201001",
+      "source": "9.1.6.2 국제 주요국 주가지수"
+    },
+    {
+      "key": "hhDebt",
+      "label": "가계대출 잔액",
+      "short": "가계대출",
+      "unit": "십억원",
+      "table": "151Y004",
+      "item": "1100000",
+      "period": "Q",
+      "start": "2000Q1",
+      "source": "1.2.4.1.2 가계신용(용도별, 분기)"
+    },
+    {
+      "key": "hhMortgageDebt",
+      "label": "가계 주택관련대출 잔액",
+      "short": "주택관련대출",
+      "unit": "십억원",
+      "table": "151Y004",
+      "item": "11000A0",
+      "period": "Q",
+      "start": "2000Q1",
+      "source": "1.2.4.1.2 가계신용(용도별, 분기)"
+    },
+    {
+      "key": "housePrice",
+      "label": "KB 주택매매가격지수(전국)",
+      "short": "주택매매가(전국)",
+      "unit": "지수",
+      "table": "901Y062",
+      "item": "P63A",
+      "period": "M",
+      "start": "200801",
+      "source": "4.4.1.1 주택매매가격지수(KB)"
+    },
+    {
+      "key": "housePriceApt",
+      "label": "KB 아파트매매가격지수(전국)",
+      "short": "아파트매매가(전국)",
+      "unit": "지수",
+      "table": "901Y062",
+      "item": "P63AC",
+      "period": "M",
+      "start": "200801",
+      "source": "4.4.1.1 주택매매가격지수(KB)"
+    },
+    {
+      "key": "econSentiment",
+      "label": "경제심리지수(원계열)",
+      "short": "경제심리",
+      "unit": "점",
+      "table": "513Y001",
+      "item": "E1000",
+      "period": "M",
+      "start": "200301",
+      "source": "6.3 경제심리지수"
+    }
+  ]
+}
