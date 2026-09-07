@@ -70,6 +70,77 @@ export default async function YoungkulPage() {
 
       <section>
         <SectionTitle
+          title="신규취급 vs 잔액 기준 — 지금 대출이 더 비쌀까?"
+          sub="신규 금리는 이번 달 시장을, 잔액 금리는 기존 대출자 전체의 평균 부담을 본다"
+        />
+        <Card>
+          <MultiLineChart
+            unit="%"
+            series={[
+              {
+                name: "주담대(신규취급)",
+                color: COLORS.mortgage,
+                points: all.mortgage.points.filter((p) => p.t >= "2010-01"),
+              },
+              {
+                name: "주담대(잔액 기준)",
+                color: COLORS.mortgageOut,
+                points: all.mortgageOut.points,
+              },
+              {
+                name: "기준금리",
+                color: COLORS.baseRate,
+                points: all.baseRate.points.filter((p) => p.t >= "2010-01"),
+                dashed: true,
+              },
+            ]}
+          />
+        </Card>
+        <Note>
+          신규취급 금리가 잔액 기준보다 높게 벌어지면 &lsquo;지금 새로 대출받는 사람&rsquo;의 부담이
+          기존 대출자 평균보다 무겁다는 뜻이다. 인상기에 이 갭이 커지고, 인하기에 신규 금리가
+          먼저 내려가 갭이 반전되기도 한다 — 갈아타기(대환)의 타이밍 논쟁이 벌어지는 지점.
+        </Note>
+      </section>
+
+      <section>
+        <SectionTitle
+          title="매매가 vs 전세가 — 영끌의 기회비용"
+          sub="KB 매매·전세가격지수(전국) 전년동월비. 전세가 더 오르는 시기엔 사는 쪽이 상대적으로 유리해진다"
+        />
+        <Card>
+          <MultiLineChart
+            unit="%"
+            zeroLine
+            series={[
+              {
+                name: "주택매매가",
+                color: COLORS.housePrice,
+                points: houseYoYSeries(all).filter((p) => p.t >= "2015-01"),
+              },
+              {
+                name: "주택전세가",
+                color: COLORS.jeonse,
+                points: yoySeries(all.jeonse.points).filter((p) => p.t >= "2015-01"),
+              },
+              {
+                name: "아파트전세가",
+                color: COLORS.jeonseApt,
+                points: yoySeries(all.jeonseApt.points).filter((p) => p.t >= "2015-01"),
+                dashed: true,
+              },
+            ]}
+          />
+        </Card>
+        <Note>
+          전세가 급등하는 시기(2020~2021)엔 &lsquo;전세 자낭비&rsquo; 논쟁과 함께 영끌(매수) 유인이 커지고,
+          전세가 안정되면 대출 이자를 감수할 이유가 줄어든다. 두 지수의 방향 차이는 주택 시장의
+          수요가 사려는 쪽인지 빌리려는 쪽인지로 쏠렸는지를 보여준다.
+        </Note>
+      </section>
+
+      <section>
+        <SectionTitle
           title="가계의 무게 — 주택관련대출"
           sub={`가계대출 ${fmtTrillionWon(latest(all.hhDebt.points)?.v)} 중 주택관련대출 ${fmtTrillionWon(
             latest(all.hhMortgageDebt.points)?.v

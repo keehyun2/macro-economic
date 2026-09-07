@@ -82,6 +82,17 @@ export function diffSeries(a: Point[], b: Point[]): Point[] {
   return a.filter((p) => bMap.has(p.t)).map((p) => ({ t: p.t, v: p.v - bMap.get(p.t)! }));
 }
 
+/** n칸 이동합 시리즈 (경상수지처럼 월별 노이즈가 큰 계열의 연간화). */
+export function rollingSumSeries(points: Point[], n: number): Point[] {
+  const out: Point[] = [];
+  for (let i = n - 1; i < points.length; i++) {
+    let sum = 0;
+    for (let j = i - n + 1; j <= i; j++) sum += points[j].v;
+    out.push({ t: points[i].t, v: sum });
+  }
+  return out;
+}
+
 /** 최근 값이 sinceT 이후 역사에서 상위 몇 %에 위치하는지 (0~100, 높을수록 높은 값). */
 export function percentileOfLatest(points: Point[], sinceT?: string): number | null {
   if (points.length < 6) return null;

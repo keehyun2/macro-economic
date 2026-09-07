@@ -7,7 +7,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "가계금융 레이더 — 영끌·빚투 부담 지표",
   description:
-    "한국은행 경제통계시스템(ECOS) 공식 통계로 보는 영끌족·빚투족의 이자 부담과 금융시장 상황별 이득·손해.",
+    "한국은행 경제통계시스템(ECOS) 공식 통계로 보는 영끌족·빚투족·예금족의 이자 부담·수익과 금융시장 상황별 이득·손해.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -22,7 +22,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 가계금융 레이더
               </span>
               <span className="hidden text-[11px] text-slate-500 sm:inline">
-                영끌·빚투 부담 지표
+                영끌·빚투·예금 부담 지표
               </span>
             </Link>
             <div className="ml-auto">

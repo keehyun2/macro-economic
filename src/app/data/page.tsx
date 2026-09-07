@@ -23,7 +23,7 @@ export default async function DataPage() {
       </div>
 
       <section>
-        <SectionTitle title="사용 통계표" sub="15개 시계열 — 통계표코드/항목코드까지 전부 공개" />
+        <SectionTitle title="사용 통계표" sub={`${SERIES_DEFS.length}개 시계열 — 통계표코드/항목코드까지 전부 공개`} />
         <Card className="overflow-x-auto">
           <table className="w-full min-w-[720px] border-collapse text-xs">
             <thead>
@@ -110,7 +110,10 @@ export default async function DataPage() {
         <Card>
           <ul className="list-disc space-y-1.5 pl-4 text-xs leading-relaxed text-slate-400">
             <li><b className="text-slate-300">신규취급 금리</b>: 해당 월에 새로 잡은 대출의 평균 금리. 기존 대출 금리(잔액 기준)보다 시장 상황을 빠르게 반영한다.</li>
+            <li><b className="text-slate-300">잔액 기준 금리</b>: 대출·예금 잔액 전체의 평균 금리. 기존 계약이 끼워진 &lsquo;기존 고객 평균&rsquo;이며 신규 금리보다 움직임이 느리다.</li>
+            <li><b className="text-slate-300">경기종합지수 순환변동치</b>: ECOS 수록값 그대로 사용(2020=100 지수형). 100을 기준으로 위아래로 읽는다.</li>
             <li><b className="text-slate-300">빚투 손익분기 수익률</b>: 은행 신규 신용대출 평균 금리로 근사했다. 증권사 마진론·카드론은 더 비싸다.</li>
+            <li><b className="text-slate-300">실질 예금금리</b>: 정기예금(1년) 신규금리 − CPI 전년비. 세전 기준이라 일반과세 원천징수(15.4%)를 반영하면 더 낮아진다. 적금·보통예금 금리는 통상 더 낮다.</li>
             <li><b className="text-slate-300">레버리지 스프레드</b>: KOSPI 월평균 12개월 수익률 − 신용대출 금리. 개별 투자 성과가 아니라 시장 전체의 대표값이다.</li>
             <li><b className="text-slate-300">KB 주택가격지수</b>: ECOS 수록분(전국) 사용. 도심·극히 일부 단지 체감과는 차이가 있다.</li>
             <li>점수·시뮬레이션은 통계 기반 해석 도구이며 금융 상품 추천이 아니다.</li>

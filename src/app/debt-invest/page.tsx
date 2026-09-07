@@ -2,7 +2,7 @@ import { MultiLineChart, SingleAreaChart } from "@/components/charts";
 import { AsOfChip, Card, KpiTile, Note, SectionTitle } from "@/components/ui";
 import { loadAll } from "@/lib/data";
 import { kospi12mSeries, leverageSpreadSeries } from "@/lib/indicators";
-import { latest } from "@/lib/series";
+import { diffSeries, latest } from "@/lib/series";
 import { COLORS } from "@/lib/colors";
 import { fmtNum, fmtPct, fmtPp, fmtT } from "@/lib/format";
 
@@ -80,6 +80,47 @@ export default async function DebtInvestPage() {
         <Note>
           참고: 이 시기 신용대출 평균 금리는 {fmtPct(creditAvg, 2)} (2006년 이후 전체 평균). 마진론
           (증권사 신용융자) 금리는 통상 이보다 높다 — 손익분기선은 더 높게 잡아야 한다.
+        </Note>
+      </section>
+
+      <section>
+        <SectionTitle
+          title="차입비용의 시장판 — CD·회사채와 은행 금리"
+          sub="같은 &lsquo;빌리는 비용&rsquo;이라도 은행 신용대출·기업 회사채·단기 CD의 금리가 서로 다르다"
+        />
+        <Card>
+          <MultiLineChart
+            unit="%"
+            series={[
+              {
+                name: "신용대출(신규)",
+                color: COLORS.credit,
+                points: all.credit.points.filter((p) => p.t >= SINCE),
+              },
+              {
+                name: "회사채(3년, AA-)",
+                color: COLORS.corpBond3y,
+                points: all.corpBond3y.points,
+              },
+              {
+                name: "CD(91일)",
+                color: COLORS.cd91,
+                points: all.cd91.points,
+              },
+              {
+                name: "국고채(3년)",
+                color: COLORS.tbond3y,
+                points: all.tbond3y.points,
+                dashed: true,
+              },
+            ]}
+          />
+        </Card>
+        <Note>
+          시장금리(국고채·CD·회사채)는 일별 시장에서 결정되는 &lsquo;돈의 도매가격&rsquo;이고, 은행
+          대출금리는 여기에 은행 마진을 얹은 &lsquo;소매가격&rsquo;이다. 회사채(3년)와 국고채(3년)의 차이는
+          신용위험 프리미엄 — 현재 약 {fmtPp(latest(diffSeries(all.corpBond3y.points, all.tbond3y.points))?.v ?? null, 2)}.
+          이 스프레드가 넓어지는 국면(2020.3, 2022 하반기)은 시장이 위험을 느끼고 있다는 신호다.
         </Note>
       </section>
 

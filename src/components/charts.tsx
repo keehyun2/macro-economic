@@ -85,6 +85,7 @@ export function MultiLineChart({
   height = 300,
   unit = "",
   zeroLine = false,
+  refLineY,
   refAreas = [],
   legend = true,
 }: {
@@ -92,6 +93,8 @@ export function MultiLineChart({
   height?: number;
   unit?: string;
   zeroLine?: boolean;
+  /** 0 외의 기준선(예: 경기종합지수 100). */
+  refLineY?: number;
   refAreas?: RefAreaSpec[];
   legend?: boolean;
 }) {
@@ -115,6 +118,7 @@ export function MultiLineChart({
           />
         ))}
         {zeroLine && <ReferenceLine y={0} stroke="#475569" />}
+        {refLineY !== undefined && <ReferenceLine y={refLineY} stroke="#475569" />}
         {series.map((s) => (
           <Line
             key={s.name}

@@ -166,6 +166,151 @@
       "period": "M",
       "start": "200301",
       "source": "6.3 경제심리지수"
+    },
+    {
+      "key": "savings",
+      "label": "정기적금 금리(신규취급)",
+      "short": "정기적금(신규)",
+      "unit": "연%",
+      "table": "121Y002",
+      "item": "BEABAA212",
+      "period": "M",
+      "start": "200601",
+      "source": "1.3.3.1.1 예금은행 수신금리(신규취급액 기준)"
+    },
+    {
+      "key": "mmda",
+      "label": "개인 MMDA 금리(잔액 기준)",
+      "short": "개인MMDA(잔액)",
+      "unit": "연%",
+      "table": "121Y013",
+      "item": "BEABAB2212",
+      "period": "M",
+      "start": "200601",
+      "source": "1.3.3.1.2 예금은행 수신금리(잔액 기준)"
+    },
+    {
+      "key": "mortgageOut",
+      "label": "주택담보대출 금리(잔액 기준)",
+      "short": "주담대(잔액)",
+      "unit": "연%",
+      "table": "121Y015",
+      "item": "BECBLB020202",
+      "period": "M",
+      "start": "200909",
+      "source": "1.3.3.2.2 예금은행 대출금리(잔액 기준)"
+    },
+    {
+      "key": "cd91",
+      "label": "CD(91일) 수익률(월평균)",
+      "short": "CD(91일)",
+      "unit": "연%",
+      "table": "817Y002",
+      "item": "010502000",
+      "period": "D",
+      "monthlyAvg": true,
+      "start": "20150101",
+      "source": "1.3.3.2 시장금리(일별)"
+    },
+    {
+      "key": "corpBond3y",
+      "label": "회사채(3년, AA-) 수익률(월평균)",
+      "short": "회사채(3년)",
+      "unit": "연%",
+      "table": "817Y002",
+      "item": "010300000",
+      "period": "D",
+      "monthlyAvg": true,
+      "start": "20150101",
+      "source": "1.3.3.2 시장금리(일별)"
+    },
+    {
+      "key": "jeonse",
+      "label": "KB 주택전세가격지수(전국)",
+      "short": "주택전세가(전국)",
+      "unit": "지수",
+      "table": "901Y063",
+      "item": "P64A",
+      "period": "M",
+      "start": "200801",
+      "source": "4.4.1.2 주택전세가격지수(KB)"
+    },
+    {
+      "key": "jeonseApt",
+      "label": "KB 아파트전세가격지수(전국)",
+      "short": "아파트전세가(전국)",
+      "unit": "지수",
+      "table": "901Y063",
+      "item": "P64AC",
+      "period": "M",
+      "start": "200801",
+      "source": "4.4.1.2 주택전세가격지수(KB)"
+    },
+    {
+      "key": "ppi",
+      "label": "생산자물가지수 총지수",
+      "short": "생산자물가",
+      "unit": "2020=100",
+      "table": "404Y014",
+      "item": "*AA",
+      "period": "M",
+      "start": "200001",
+      "source": "4.1.1.1 생산자물가지수(기본분류)"
+    },
+    {
+      "key": "bankDeposits",
+      "label": "예금은행 수신합계(말잔)",
+      "short": "은행 수신잔액",
+      "unit": "십억원",
+      "table": "104Y013",
+      "item": "BCB8",
+      "period": "M",
+      "start": "200001",
+      "source": "1.2.1.1.2 예금은행 총수신(말잔)"
+    },
+    {
+      "key": "leadingIdx",
+      "label": "경기 선행지수 순환변동치",
+      "short": "경기 선행지수",
+      "unit": "2020=100",
+      "table": "901Y067",
+      "item": "I16E",
+      "period": "M",
+      "start": "200001",
+      "source": "8.1.2 경기종합지수"
+    },
+    {
+      "key": "coincidentIdx",
+      "label": "경기 동행지수 순환변동치",
+      "short": "경기 동행지수",
+      "unit": "2020=100",
+      "table": "901Y067",
+      "item": "I16D",
+      "period": "M",
+      "start": "200001",
+      "source": "8.1.2 경기종합지수"
+    },
+    {
+      "key": "m2",
+      "label": "M2 광의통화(말잔, 원계열)",
+      "short": "M2",
+      "unit": "십억원",
+      "table": "161Y008",
+      "item": "BBGA00",
+      "period": "M",
+      "start": "200001",
+      "source": "1.1.3.1.4 M2 상품별 구성내역(말잔, 원계열)"
+    },
+    {
+      "key": "currentAccount",
+      "label": "경상수지",
+      "short": "경상수지",
+      "unit": "백만달러",
+      "table": "301Y013",
+      "item": "000000",
+      "period": "M",
+      "start": "200001",
+      "source": "2.5.1.1 국제수지"
     }
   ]
 }

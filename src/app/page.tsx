@@ -1,6 +1,7 @@
 import { MultiLineChart, SingleAreaChart } from "@/components/charts";
 import { AsOfChip, Card, KpiTile, Note, PersonaCard, SectionTitle } from "@/components/ui";
 import { loadAll, latestAsOf } from "@/lib/data";
+import { SERIES_DEFS } from "@/lib/stat-codes";
 import {
   cpiYoySeries,
   computeFactors,
@@ -9,7 +10,7 @@ import {
   realRateSeries,
 } from "@/lib/indicators";
 import { currentZ, PERSONAS, scorePersona } from "@/lib/personas";
-import { latest, pctChangeSeries } from "@/lib/series";
+import { latest, pctChangeSeries, rollingSumSeries, yoySeries } from "@/lib/series";
 import { COLORS } from "@/lib/colors";
 import { fmtNum, fmtPct, fmtSigned, fmtT } from "@/lib/format";
 
@@ -31,6 +32,13 @@ export default async function DashboardPage() {
   const realDeposit = realRateSeries(all.deposit.points, all.cpi.points);
   const kospi3m = pctChangeSeries(all.kospi.points, 3);
   const houseYoY = houseYoYSeries(all);
+  const ppiYoy = yoySeries(all.ppi.points);
+  const m2YoY = yoySeries(all.m2.points);
+  // 경상수지는 월별 변동이 커서 12개월 이동합(연율)으로 본다 — 백만달러 → 억달러
+  const bop12m = rollingSumSeries(all.currentAccount.points, 12).map((p) => ({
+    t: p.t,
+    v: Math.round((p.v / 100) * 10) / 10,
+  }));
 
   const asOf = latestAsOf(all);
   const liveCount = Object.values(all).filter((s) => s.live).length;
@@ -41,7 +49,7 @@ export default async function DashboardPage() {
         <AsOfChip>📊 데이터 시점 {fmtT(asOf)} (지표별 상이 · /data 참조)</AsOfChip>
         <AsOfChip>
           {liveCount > 0
-            ? `🟢 live ${liveCount}/15 · ECOS 직접 조회`
+            ? `🟢 live ${liveCount}/${SERIES_DEFS.length} · ECOS 직접 조회`
             : "🟡 스냅샷 모드 (ECOS 미응답)"}
         </AsOfChip>
       </div>
@@ -195,6 +203,94 @@ export default async function DashboardPage() {
             />
           </Card>
         </div>
+      </section>
+      <section>
+        <SectionTitle
+          title="거시 배경"
+          sub="페르소나 점수에는 들어가지 않지만 시장 방향을 읽는 배경 지표 — 경기·유동성·물가·경상수지"
+        />
+        <div className="grid gap-6 md:grid-cols-2">
+          <div>
+            <h3 className="mb-1 text-xs font-medium text-slate-300">
+              경기종합지수 순환변동치 — 선행 vs 동행 (100 기준)
+            </h3>
+            <Card>
+              <MultiLineChart
+                height={220}
+                unit=""
+                legend={false}
+                refLineY={100}
+                series={[
+                  {
+                    name: "선행지수",
+                    color: COLORS.leadingIdx,
+                    points: since(all.leadingIdx.points, SINCE),
+                  },
+                  {
+                    name: "동행지수",
+                    color: COLORS.coincidentIdx,
+                    points: since(all.coincidentIdx.points, SINCE),
+                    dashed: true,
+                  },
+                ]}
+              />
+            </Card>
+          </div>
+          <div>
+            <h3 className="mb-1 text-xs font-medium text-slate-300">M2(광의통화) 전년비 — 유동성</h3>
+            <Card>
+              <MultiLineChart
+                height={220}
+                unit="%"
+                zeroLine
+                legend={false}
+                series={[{ name: "M2 전년비", color: COLORS.m2, points: since(m2YoY, SINCE) }]}
+              />
+            </Card>
+          </div>
+          <div>
+            <h3 className="mb-1 text-xs font-medium text-slate-300">
+              경상수지 12개월 이동합 — 원화의 기본배경
+            </h3>
+            <Card>
+              <SingleAreaChart
+                height={220}
+                name="경상수지(12M)"
+                unit="억$"
+                color={COLORS.currentAccount}
+                points={since(bop12m, SINCE)}
+                zeroLine
+              />
+            </Card>
+          </div>
+          <div>
+            <h3 className="mb-1 text-xs font-medium text-slate-300">
+              소비자물가 vs 생산자물가 전년비
+            </h3>
+            <Card>
+              <MultiLineChart
+                height={220}
+                unit="%"
+                zeroLine
+                legend={false}
+                series={[
+                  { name: "소비자물가", color: COLORS.cpiYoy, points: since(cpiYoy, SINCE) },
+                  {
+                    name: "생산자물가",
+                    color: COLORS.ppi,
+                    points: since(ppiYoy, SINCE),
+                    dashed: true,
+                  },
+                ]}
+              />
+            </Card>
+          </div>
+        </div>
+        <Note>
+          선행지수가 동행지수보다 먼저 방향을 잡는다. 경상수지 흑자는 원화 강세 압력, 적자는
+          약세 압력과 연결된다. 생산자물가는 소비자물가의 선행 압력으로 읽는다. 이 섹션의 지표는
+          페르소나 점수 모델에는 반영되지 않는다.
+        </Note>
       </section>
     </div>
   );

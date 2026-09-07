@@ -7,6 +7,7 @@ const LINKS = [
   { href: "/", label: "대시보드" },
   { href: "/youngkul", label: "영끌족" },
   { href: "/debt-invest", label: "빚투족" },
+  { href: "/saver", label: "예금족" },
   { href: "/matrix", label: "승자·패자" },
   { href: "/data", label: "데이터" },
 ];
