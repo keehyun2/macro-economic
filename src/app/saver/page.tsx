@@ -3,7 +3,7 @@ import { MultiLineChart, SingleAreaChart } from "@/components/charts";
 import { AsOfChip, Card, KpiTile, Note, SectionTitle } from "@/components/ui";
 import { loadAll } from "@/lib/data";
 import { cpiYoySeries, monthlyInterestSeries, realRateSeries } from "@/lib/indicators";
-import { latest, percentileOfLatest, valueAt, yoySeries } from "@/lib/series";
+import { latest, percentileOfLatest, since, valueAt, yoySeries } from "@/lib/series";
 import { COLORS } from "@/lib/colors";
 import { fmtPct, fmtT, fmtTrillionWon } from "@/lib/format";
 
@@ -89,17 +89,17 @@ export default async function SaverPage() {
               {
                 name: "정기예금(1년)",
                 color: COLORS.deposit,
-                points: all.deposit.points.filter((p) => p.t >= SINCE),
+                points: since(all.deposit.points, SINCE),
               },
               {
                 name: "정기적금",
                 color: COLORS.savings,
-                points: all.savings.points.filter((p) => p.t >= SINCE),
+                points: since(all.savings.points, SINCE),
               },
               {
                 name: "개인 MMDA(잔액 기준)",
                 color: COLORS.mmda,
-                points: all.mmda.points.filter((p) => p.t >= SINCE),
+                points: since(all.mmda.points, SINCE),
                 dashed: true,
               },
             ]}
@@ -125,17 +125,17 @@ export default async function SaverPage() {
               {
                 name: "정기예금(1년) 금리",
                 color: COLORS.deposit,
-                points: all.deposit.points.filter((p) => p.t >= SINCE),
+                points: since(all.deposit.points, SINCE),
               },
               {
                 name: "소비자물가 전년비",
                 color: COLORS.cpiYoy,
-                points: cpiYoy.filter((p) => p.t >= SINCE),
+                points: since(cpiYoy, SINCE),
               },
               {
                 name: "생산자물가 전년비",
                 color: COLORS.ppi,
-                points: yoySeries(all.ppi.points).filter((p) => p.t >= SINCE),
+                points: since(yoySeries(all.ppi.points), SINCE),
                 dashed: true,
               },
               {
@@ -171,17 +171,17 @@ export default async function SaverPage() {
               {
                 name: "정기예금(1년)",
                 color: COLORS.deposit,
-                points: all.deposit.points.filter((p) => p.t >= SINCE_FX),
+                points: since(all.deposit.points, SINCE_FX),
               },
               {
                 name: "국고채(3년)",
                 color: COLORS.tbond3y,
-                points: all.tbond3y.points.filter((p) => p.t >= SINCE_FX),
+                points: since(all.tbond3y.points, SINCE_FX),
               },
               {
                 name: "기준금리",
                 color: COLORS.baseRate,
-                points: all.baseRate.points.filter((p) => p.t >= SINCE_FX),
+                points: since(all.baseRate.points, SINCE_FX),
                 dashed: true,
               },
             ]}
@@ -205,7 +205,7 @@ export default async function SaverPage() {
             name="은행 수신잔액"
             unit="조원"
             color={COLORS.bankDeposits}
-            points={depositsTrillion.filter((p) => p.t >= SINCE)}
+            points={since(depositsTrillion, SINCE)}
           />
         </Card>
         <Note>

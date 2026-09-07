@@ -2,20 +2,20 @@
 
 import { useMemo, useState } from "react";
 import { MultiLineChart } from "@/components/charts";
-import { Card, PercentileBar, SectionTitle } from "@/components/ui";
+import { Card, PercentileBar, SegToggle, SectionTitle, SimStat } from "@/components/ui";
 import { COLORS } from "@/lib/colors";
-import { delta, latest } from "@/lib/series";
-import { fmtManWon, fmtNum, fmtPct, fmtPp } from "@/lib/format";
+import { delta, latest, percentileOfLatest, since } from "@/lib/series";
+import { fmtManWon, fmtManWonSigned, fmtNum, fmtPct, fmtPp } from "@/lib/format";
 import type { Point } from "@/lib/series";
 
 const SINCE = "2015-01";
+const PERCENTILE_SINCE = "2013-01"; // 변동·고정형 신규금리 데이터 확보 시점
 
 export function YoungkulSim({
   varRates,
   fixedRates,
   varInterest,
   fixedInterest,
-  percentile,
   houseYoY,
   asOf,
 }: {
@@ -23,7 +23,6 @@ export function YoungkulSim({
   fixedRates: Point[];
   varInterest: Point[]; // 원금 1억 기준 월 이자(만원)
   fixedInterest: Point[];
-  percentile: number | null; // 현재 주담대 금리의 2006년 이후 백분위
   houseYoY: number | null; // 주택매매가 전년비 %
   asOf: string;
 }) {
@@ -35,10 +34,10 @@ export function YoungkulSim({
   const color = product === "var" ? COLORS.mortgageVar : COLORS.mortgageFixed;
 
   const rateNow = latest(rates)?.v ?? null;
-  const rate3yAgo = useMemo(
-    () => (rates.length ? (delta(rates, 36) !== null ? rateNow! - delta(rates, 36)! : null) : null),
-    [rates, rateNow]
-  );
+  // 3년 전 금리 = 현재 − (3년 새 변화량). delta는 최근 값 기준이므로 한 번만 호출한다.
+  const d3y = delta(rates, 36);
+  const rate3yAgo = d3y !== null && rateNow !== null ? rateNow - d3y : null;
+  const percentile = useMemo(() => percentileOfLatest(rates, PERCENTILE_SINCE), [rates]);
 
   const monthlyNow = rateNow !== null ? (principalEok * 1e8 * (rateNow / 100)) / 12 : null;
   const monthly3y =
@@ -50,9 +49,10 @@ export function YoungkulSim({
 
   const chartPoints = useMemo(
     () =>
-      interest
-        .filter((p) => p.t >= SINCE)
-        .map((p) => ({ t: p.t, v: Math.round(p.v * principalEok * 10) / 10 })),
+      since(interest, SINCE).map((p) => ({
+        t: p.t,
+        v: Math.round(p.v * principalEok * 10) / 10,
+      })),
     [interest, principalEok]
   );
 
@@ -63,26 +63,14 @@ export function YoungkulSim({
           title="월 이자 시뮬레이터"
           sub={`신규취급 평균금리 기준 · 원금 만기일시 상환 가정 · 데이터 시점 ${asOf}`}
           right={
-            <div className="flex rounded-lg border border-slate-700 p-0.5 text-xs">
-              <button
-                type="button"
-                onClick={() => setProduct("var")}
-                className={`rounded-md px-3 py-1 ${
-                  product === "var" ? "bg-slate-800 text-slate-100" : "text-slate-400"
-                }`}
-              >
-                변동형
-              </button>
-              <button
-                type="button"
-                onClick={() => setProduct("fixed")}
-                className={`rounded-md px-3 py-1 ${
-                  product === "fixed" ? "bg-slate-800 text-slate-100" : "text-slate-400"
-                }`}
-              >
-                고정형
-              </button>
-            </div>
+            <SegToggle
+              value={product}
+              onChange={setProduct}
+              options={[
+                { value: "var", label: "변동형" },
+                { value: "fixed", label: "고정형" },
+              ]}
+            />
           }
         />
         <div className="mb-4 flex flex-wrap items-center gap-4">
@@ -107,46 +95,30 @@ export function YoungkulSim({
         </div>
 
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <div className="rounded-lg border border-slate-800 bg-slate-950/50 p-3">
-            <div className="text-[11px] text-slate-400">월 이자(현재 금리)</div>
-            <div className="mt-1 text-xl font-semibold text-slate-50">
-              {fmtManWon(monthlyNow, 0)}
-            </div>
-          </div>
-          <div className="rounded-lg border border-slate-800 bg-slate-950/50 p-3">
-            <div className="text-[11px] text-slate-400">연 이자(12개월)</div>
-            <div className="mt-1 text-xl font-semibold text-slate-50">
-              {fmtManWon(monthlyNow !== null ? monthlyNow * 12 : null, 0)}
-            </div>
-          </div>
-          <div className="rounded-lg border border-slate-800 bg-slate-950/50 p-3">
-            <div className="text-[11px] text-slate-400">3년 전 금리 대비 월 이자</div>
-            <div
-              className={`mt-1 text-xl font-semibold ${
-                diff3y === null ? "text-slate-500" : diff3y > 0 ? "text-rose-400" : "text-emerald-400"
-              }`}
-            >
-              {diff3y === null
-                ? "–"
-                : `${diff3y > 0 ? "+" : ""}${fmtManWon(diff3y, 0).replace("-", "−")}`}
-            </div>
-            <div className="text-[11px] text-slate-500">
-              금리 {fmtPp(rateNow !== null && rate3yAgo !== null ? rateNow - rate3yAgo : null)}
-            </div>
-          </div>
-          <div className="rounded-lg border border-slate-800 bg-slate-950/50 p-3">
-            <div className="text-[11px] text-slate-400">금리 ±1%p 시 월 이자</div>
-            <div className="mt-1 text-xl font-semibold text-slate-50">
-              ±{fmtManWon(sensPerPp, 0)}
-            </div>
-            <div className="text-[11px] text-slate-500">완만한 상환 무시(이자만)</div>
-          </div>
+          <SimStat label="월 이자(현재 금리)" value={fmtManWon(monthlyNow, 0)} />
+          <SimStat
+            label="연 이자(12개월)"
+            value={fmtManWon(monthlyNow !== null ? monthlyNow * 12 : null, 0)}
+          />
+          <SimStat
+            label="3년 전 금리 대비 월 이자"
+            value={fmtManWonSigned(diff3y)}
+            tone={diff3y === null ? "muted" : diff3y > 0 ? "bad" : "good"}
+            sub={`금리 ${fmtPp(rateNow !== null && rate3yAgo !== null ? rateNow - rate3yAgo : null)}`}
+          />
+          <SimStat
+            label="금리 ±1%p 시 월 이자"
+            value={`±${fmtManWon(sensPerPp, 0)}`}
+            sub="완만한 상환 무시(이자만)"
+          />
         </div>
 
         <div className="mt-6">
           <PercentileBar
             pct={percentile}
-            label={`현재 주담대(신규) 금리 ${fmtPct(rateNow)}의 2006년 이후 위치`}
+            label={`현재 ${product === "var" ? "변동형" : "고정형"} 주담대 신규금리 ${fmtPct(
+              rateNow
+            )}의 2013년 이후 위치`}
           />
           {houseYoY !== null && (
             <p className="mt-3 text-xs text-slate-400">

@@ -1,7 +1,6 @@
 import { Card, Note, SectionTitle } from "@/components/ui";
 import { loadAll } from "@/lib/data";
 import {
-  cpiYoySeries,
   computeFactors,
   factorDeltaLabel,
   factorValueLabel,
@@ -9,7 +8,8 @@ import {
   type FactorKey,
 } from "@/lib/indicators";
 import { PERSONAS, scorePersona, currentZ, type Z } from "@/lib/personas";
-import { valueAt, yoySeries } from "@/lib/series";
+import { latestAsOf } from "@/lib/data";
+import { stepBack, valueAsOf, yoySeries } from "@/lib/series";
 import type { Point } from "@/lib/series";
 import type { AllSeries } from "@/lib/data";
 
@@ -37,17 +37,18 @@ const SCENARIOS: { label: string; z: Z }[] = [
   { label: "금리↓ · 물가↓ · 환율↓", z: scenarioZ(-1, -1, -1) },
 ];
 
-/** 과거 구간의 z 벡터 — 구간 양 끝 값 차이를 같은 정규화로. */
+/** 과거 구간의 z 벡터 — 구간 양 끝 값 차이를 같은 정규화로.
+ *  끝점은 as-of 조회: 공표 시차로 그 달 관측이 없는 계열은 직전 값을 쓴다. */
 function windowZ(all: AllSeries, tFrom: string, tTo: string): Z {
   const d = (pts: Point[]): number | null => {
-    const a = valueAt(pts, tFrom);
-    const b = valueAt(pts, tTo);
+    const a = valueAsOf(pts, tFrom);
+    const b = valueAsOf(pts, tTo);
     if (a === null || b === null) return null;
     return b - a;
   };
   const pct = (pts: Point[]): number | null => {
-    const a = valueAt(pts, tFrom);
-    const b = valueAt(pts, tTo);
+    const a = valueAsOf(pts, tFrom);
+    const b = valueAsOf(pts, tTo);
     if (a === null || b === null || a === 0) return null;
     return ((b - a) / a) * 100;
   };
@@ -70,11 +71,14 @@ function windowZ(all: AllSeries, tFrom: string, tTo: string): Z {
   return z;
 }
 
-const CYCLES = [
-  { label: "코로나 저금리기", from: "2020-02", to: "2021-08", desc: "기준금리 0.5% 시대 — 빚투·영끌의 황금기" },
-  { label: "긴축 인상기", from: "2021-09", to: "2023-01", desc: "기준금리 급등 — 레버리지 가계의 압박기" },
-  { label: "최근 1년", from: "2025-08", to: "2026-08", desc: "최신 12개월 구간" },
-];
+/** 리플레이 구간 — 고정 국면 2종 + 데이터 최신 시점 기준 '최근 1년'. */
+function cyclesOf(asOf: string) {
+  return [
+    { label: "코로나 저금리기", from: "2020-02", to: "2021-08", desc: "기준금리 0.5% 시대 — 빚투·영끌의 황금기" },
+    { label: "긴축 인상기", from: "2021-09", to: "2023-01", desc: "기준금리 급등 — 레버리지 가계의 압박기" },
+    { label: "최근 1년", from: stepBack(asOf, 12), to: asOf, desc: "최신 12개월 구간" },
+  ];
+}
 
 function ScoreCell({ score, highlight }: { score: number; highlight?: boolean }) {
   const tone =
@@ -106,7 +110,7 @@ export default async function MatrixPage() {
     cells: SCENARIOS.map((s) => scorePersona(p, s.z)),
   }));
 
-  const cycles = CYCLES.map((c) => ({
+  const cycles = cyclesOf(latestAsOf(all)).map((c) => ({
     ...c,
     scores: PERSONAS.map((p) => scorePersona(p, windowZ(all, c.from, c.to))),
   }));
@@ -205,10 +209,13 @@ export default async function MatrixPage() {
                 <div className="mt-3 space-y-1.5">
                   <div className="flex items-center gap-2 text-xs">
                     <span className="text-emerald-400">🥇 {winner.persona.emoji} {winner.persona.name}</span>
-                    <span className="ml-auto font-mono text-emerald-300">+{winner.score}</span>
+                    <span className="ml-auto font-mono text-emerald-300">
+                      {winner.score > 0 ? "+" : ""}
+                      {winner.score}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 text-xs">
-                    <span className="text-rose-400">🥉 {loser.persona.emoji} {loser.persona.name}</span>
+                    <span className="text-rose-400">🥲 {loser.persona.emoji} {loser.persona.name}</span>
                     <span className="ml-auto font-mono text-rose-300">{loser.score}</span>
                   </div>
                 </div>
@@ -236,8 +243,9 @@ export default async function MatrixPage() {
           })}
         </div>
         <Note>
-          리플레이 점수는 구간 양 끝(시작월·끝월) 지표 값의 차이를 같은 척도로 정규화해 계산한다.
-          구간 경계는 대표 국면의 관례적 구분선이며 개월 경계와 금리 결정 시점은 일부 어긋날 수 있다.
+          리플레이 점수는 구간 양 끝(시작월·끝월) 지표 값의 차이를 같은 척도로 정규화해 계산한다
+          (공표 시차로 그 달 관측이 없는 계열은 직전 관측값 사용). 구간 경계는 대표 국면의 관례적
+          구분선이며 개월 경계와 금리 결정 시점은 일부 어긋날 수 있다.
         </Note>
       </section>
 

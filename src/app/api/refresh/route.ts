@@ -4,7 +4,7 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import type { NextRequest } from "next/server";
 
-const PATHS = ["/", "/youngkul", "/debt-invest", "/matrix", "/data"];
+const PATHS = ["/", "/youngkul", "/debt-invest", "/saver", "/matrix", "/data"];
 
 export async function GET(req: NextRequest) {
   const secret = process.env.CRON_SECRET;

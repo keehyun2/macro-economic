@@ -3,19 +3,24 @@ import { MultiLineChart } from "@/components/charts";
 import { Card, Note, SectionTitle } from "@/components/ui";
 import { loadAll } from "@/lib/data";
 import { houseYoYSeries, monthlyInterestSeries } from "@/lib/indicators";
-import { latest, percentileOfLatest, yoySeries } from "@/lib/series";
+import { latest, since, yoySeries } from "@/lib/series";
 import { COLORS } from "@/lib/colors";
 import { fmtNum, fmtT, fmtTrillionWon } from "@/lib/format";
 
 export const revalidate = 21600;
 
+const SINCE = "2015-01";
+
 export default async function YoungkulPage() {
   const all = await loadAll();
   const mortgageLast = latest(all.mortgage.points);
-  const percentile = percentileOfLatest(all.mortgage.points, "2006-01");
-  const houseYoY = latest(houseYoYSeries(all));
+  const houseYoYSeriesAll = houseYoYSeries(all);
+  const houseYoY = latest(houseYoYSeriesAll);
+  const jeonseYoY = yoySeries(all.jeonse.points);
+  const jeonseAptYoY = yoySeries(all.jeonseApt.points);
+  const houseAptYoY = yoySeries(all.housePriceApt.points);
 
-  const toTirillion = (points: { t: string; v: number }[]) =>
+  const toTrillion = (points: { t: string; v: number }[]) =>
     points.map((p) => ({ t: p.t, v: Math.round((p.v / 1000) * 10) / 10 }));
 
   return (
@@ -33,7 +38,6 @@ export default async function YoungkulPage() {
         fixedRates={all.mortgageFixed.points}
         varInterest={monthlyInterestSeries(all.mortgageVar.points)}
         fixedInterest={monthlyInterestSeries(all.mortgageFixed.points)}
-        percentile={percentile}
         houseYoY={houseYoY?.v ?? null}
         asOf={fmtT(mortgageLast?.t)}
       />
@@ -50,17 +54,17 @@ export default async function YoungkulPage() {
               {
                 name: "변동형 주담보",
                 color: COLORS.mortgageVar,
-                points: all.mortgageVar.points.filter((p) => p.t >= "2015-01"),
+                points: since(all.mortgageVar.points, SINCE),
               },
               {
                 name: "고정형 주담보",
                 color: COLORS.mortgageFixed,
-                points: all.mortgageFixed.points.filter((p) => p.t >= "2015-01"),
+                points: since(all.mortgageFixed.points, SINCE),
               },
               {
                 name: "기준금리",
                 color: COLORS.baseRate,
-                points: all.baseRate.points.filter((p) => p.t >= "2015-01"),
+                points: since(all.baseRate.points, SINCE),
                 dashed: true,
               },
             ]}
@@ -80,7 +84,7 @@ export default async function YoungkulPage() {
               {
                 name: "주담대(신규취급)",
                 color: COLORS.mortgage,
-                points: all.mortgage.points.filter((p) => p.t >= "2010-01"),
+                points: since(all.mortgage.points, "2010-01"),
               },
               {
                 name: "주담대(잔액 기준)",
@@ -90,7 +94,7 @@ export default async function YoungkulPage() {
               {
                 name: "기준금리",
                 color: COLORS.baseRate,
-                points: all.baseRate.points.filter((p) => p.t >= "2010-01"),
+                points: since(all.baseRate.points, "2010-01"),
                 dashed: true,
               },
             ]}
@@ -116,17 +120,17 @@ export default async function YoungkulPage() {
               {
                 name: "주택매매가",
                 color: COLORS.housePrice,
-                points: houseYoYSeries(all).filter((p) => p.t >= "2015-01"),
+                points: since(houseYoYSeriesAll, SINCE),
               },
               {
                 name: "주택전세가",
                 color: COLORS.jeonse,
-                points: yoySeries(all.jeonse.points).filter((p) => p.t >= "2015-01"),
+                points: since(jeonseYoY, SINCE),
               },
               {
                 name: "아파트전세가",
                 color: COLORS.jeonseApt,
-                points: yoySeries(all.jeonseApt.points).filter((p) => p.t >= "2015-01"),
+                points: since(jeonseAptYoY, SINCE),
                 dashed: true,
               },
             ]}
@@ -153,12 +157,12 @@ export default async function YoungkulPage() {
               {
                 name: "가계대출",
                 color: COLORS.hhDebt,
-                points: toTirillion(all.hhDebt.points),
+                points: toTrillion(all.hhDebt.points),
               },
               {
                 name: "주택관련대출",
                 color: COLORS.hhMortgageDebt,
-                points: toTirillion(all.hhMortgageDebt.points),
+                points: toTrillion(all.hhMortgageDebt.points),
               },
             ]}
           />
@@ -182,12 +186,12 @@ export default async function YoungkulPage() {
               {
                 name: "주택 전체",
                 color: COLORS.housePrice,
-                points: houseYoYSeries(all).filter((p) => p.t >= "2015-01"),
+                points: since(houseYoYSeriesAll, SINCE),
               },
               {
                 name: "아파트",
                 color: COLORS.mortgageFixed,
-                points: yoySeries(all.housePriceApt.points).filter((p) => p.t >= "2015-01"),
+                points: since(houseAptYoY, SINCE),
               },
             ]}
           />

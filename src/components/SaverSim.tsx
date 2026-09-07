@@ -2,10 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { MultiLineChart } from "@/components/charts";
-import { Card, PercentileBar, SectionTitle } from "@/components/ui";
+import { Card, PercentileBar, SegToggle, SectionTitle, SimStat } from "@/components/ui";
 import { COLORS } from "@/lib/colors";
-import { delta, latest } from "@/lib/series";
-import { fmtManWon, fmtNum, fmtPct, fmtPp } from "@/lib/format";
+import { delta, latest, since } from "@/lib/series";
+import { fmtManWon, fmtManWonSigned, fmtNum, fmtPct, fmtPp } from "@/lib/format";
 import type { Point } from "@/lib/series";
 
 const SINCE = "2012-01"; // 정기예금(1년) 신규금리가 확보되는 시점
@@ -30,10 +30,9 @@ export function SaverSim({
   const [tax, setTax] = useState<"pre" | "post">("post");
 
   const rateNow = latest(rates)?.v ?? null;
-  const rate3yAgo = useMemo(
-    () => (rates.length ? (delta(rates, 36) !== null ? rateNow! - delta(rates, 36)! : null) : null),
-    [rates, rateNow]
-  );
+  // 3년 전 금리 = 현재 − (3년 새 변화량). delta는 최근 값 기준이므로 한 번만 호출한다.
+  const d3y = delta(rates, 36);
+  const rate3yAgo = d3y !== null && rateNow !== null ? rateNow - d3y : null;
 
   const factor = tax === "post" ? 1 - TAX : 1;
   const monthlyNow = rateNow !== null ? (principalEok * 1e8 * (rateNow / 100) * factor) / 12 : null;
@@ -50,9 +49,10 @@ export function SaverSim({
 
   const chartPoints = useMemo(
     () =>
-      interest
-        .filter((p) => p.t >= SINCE)
-        .map((p) => ({ t: p.t, v: Math.round(p.v * principalEok * factor * 10) / 10 })),
+      since(interest, SINCE).map((p) => ({
+        t: p.t,
+        v: Math.round(p.v * principalEok * factor * 10) / 10,
+      })),
     [interest, principalEok, factor]
   );
 
@@ -63,26 +63,14 @@ export function SaverSim({
           title="예치금 이자 시뮬레이터"
           sub={`정기예금(1년) 만기일시 지급식 · 단리 가정 · 데이터 시점 ${asOf}`}
           right={
-            <div className="flex rounded-lg border border-slate-700 p-0.5 text-xs">
-              <button
-                type="button"
-                onClick={() => setTax("pre")}
-                className={`rounded-md px-3 py-1 ${
-                  tax === "pre" ? "bg-slate-800 text-slate-100" : "text-slate-400"
-                }`}
-              >
-                세전
-              </button>
-              <button
-                type="button"
-                onClick={() => setTax("post")}
-                className={`rounded-md px-3 py-1 ${
-                  tax === "post" ? "bg-slate-800 text-slate-100" : "text-slate-400"
-                }`}
-              >
-                세후(15.4%)
-              </button>
-            </div>
+            <SegToggle
+              value={tax}
+              onChange={setTax}
+              options={[
+                { value: "pre", label: "세전" },
+                { value: "post", label: "세후(15.4%)" },
+              ]}
+            />
           }
         />
         <div className="mb-4 flex flex-wrap items-center gap-4">
@@ -107,48 +95,23 @@ export function SaverSim({
         </div>
 
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <div className="rounded-lg border border-slate-800 bg-slate-950/50 p-3">
-            <div className="text-[11px] text-slate-400">월 이자({tax === "post" ? "세후" : "세전"})</div>
-            <div className="mt-1 text-xl font-semibold text-slate-50">
-              {fmtManWon(monthlyNow, 0)}
-            </div>
-          </div>
-          <div className="rounded-lg border border-slate-800 bg-slate-950/50 p-3">
-            <div className="text-[11px] text-slate-400">연 이자(12개월)</div>
-            <div className="mt-1 text-xl font-semibold text-slate-50">
-              {fmtManWon(monthlyNow !== null ? monthlyNow * 12 : null, 0)}
-            </div>
-          </div>
-          <div className="rounded-lg border border-slate-800 bg-slate-950/50 p-3">
-            <div className="text-[11px] text-slate-400">1년 뒤 실질 구매력 변화</div>
-            <div
-              className={`mt-1 text-xl font-semibold ${
-                realGain === null ? "text-slate-500" : realGain >= 0 ? "text-emerald-400" : "text-rose-400"
-              }`}
-            >
-              {realGain === null
-                ? "–"
-                : `${realGain > 0 ? "+" : ""}${fmtManWon(realGain, 0).replace("-", "−")}`}
-            </div>
-            <div className="text-[11px] text-slate-500">
-              {tax === "post" ? "세후" : "세전"} 연이자 − 물가상승분({fmtPct(cpiYoy, 1)})
-            </div>
-          </div>
-          <div className="rounded-lg border border-slate-800 bg-slate-950/50 p-3">
-            <div className="text-[11px] text-slate-400">3년 전 금리 대비 월 이자</div>
-            <div
-              className={`mt-1 text-xl font-semibold ${
-                diff3y === null ? "text-slate-500" : diff3y > 0 ? "text-emerald-400" : "text-rose-400"
-              }`}
-            >
-              {diff3y === null
-                ? "–"
-                : `${diff3y > 0 ? "+" : ""}${fmtManWon(diff3y, 0).replace("-", "−")}`}
-            </div>
-            <div className="text-[11px] text-slate-500">
-              금리 {fmtPp(rateNow !== null && rate3yAgo !== null ? rateNow - rate3yAgo : null)}
-            </div>
-          </div>
+          <SimStat label={`월 이자(${tax === "post" ? "세후" : "세전"})`} value={fmtManWon(monthlyNow, 0)} />
+          <SimStat
+            label="연 이자(12개월)"
+            value={fmtManWon(monthlyNow !== null ? monthlyNow * 12 : null, 0)}
+          />
+          <SimStat
+            label="1년 뒤 실질 구매력 변화"
+            value={fmtManWonSigned(realGain)}
+            tone={realGain === null ? "muted" : realGain >= 0 ? "good" : "bad"}
+            sub={`${tax === "post" ? "세후" : "세전"} 연이자 − 물가상승분(${fmtPct(cpiYoy, 1)})`}
+          />
+          <SimStat
+            label="3년 전 금리 대비 월 이자"
+            value={fmtManWonSigned(diff3y)}
+            tone={diff3y === null ? "muted" : diff3y > 0 ? "good" : "bad"}
+            sub={`금리 ${fmtPp(rateNow !== null && rate3yAgo !== null ? rateNow - rate3yAgo : null)}`}
+          />
         </div>
 
         <div className="mt-6">

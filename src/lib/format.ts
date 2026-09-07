@@ -33,6 +33,12 @@ export function fmtManWon(v: number | null | undefined, digits = 0): string {
   return `${fmtNum(v / 10000, digits)}만원`;
 }
 
+/** 부호 붙인 만원 — 시뮬레이터 증감 표시용(음수 기호는 유니코드 −). */
+export function fmtManWonSigned(v: number | null | undefined, digits = 0): string {
+  if (v === null || v === undefined || !Number.isFinite(v)) return "–";
+  return `${v > 0 ? "+" : ""}${fmtManWon(v, digits).replace("-", "−")}`;
+}
+
 /** '2026-08' | '2026Q2' → '2026.08' | '2026년 2Q'. */
 export function fmtT(t: string | undefined, style: "dot" | "long" = "dot"): string {
   if (!t) return "–";

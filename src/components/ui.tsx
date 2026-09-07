@@ -1,4 +1,4 @@
-// 서버에서 렌더되는 공통 UI 조각 (클라이언트 의존 없음).
+// 공통 UI 조각 — 훅 없음(콜백 prop만 받아 서버/클라이언트 양쪽 트리에서 렌더 가능).
 import type { ReactNode } from "react";
 import type { PersonaScore, Verdict } from "@/lib/personas";
 
@@ -94,7 +94,7 @@ export function PersonaCard({ ps }: { ps: PersonaScore }) {
           style={
             ps.score >= 0
               ? { left: "50%", width: `${barPct - 50}%` }
-              : { right: `${100 - barPct}%`, left: `${barPct}%` }
+              : { left: `${barPct}%`, right: "50%" }
           }
         />
       </div>
@@ -148,4 +148,61 @@ export function AsOfChip({ children }: { children: ReactNode }) {
 
 export function Note({ children }: { children: ReactNode }) {
   return <p className="mt-2 text-[11px] leading-relaxed text-slate-500">{children}</p>;
+}
+
+/** 시뮬레이터 등의 2분할 토글 (세전/세후, 변동/고정). */
+export function SegToggle<T extends string>({
+  value,
+  onChange,
+  options,
+}: {
+  value: T;
+  onChange: (v: T) => void;
+  options: { value: T; label: string }[];
+}) {
+  return (
+    <div className="flex rounded-lg border border-slate-700 p-0.5 text-xs">
+      {options.map((o) => (
+        <button
+          key={o.value}
+          type="button"
+          onClick={() => onChange(o.value)}
+          className={`rounded-md px-3 py-1 ${
+            value === o.value ? "bg-slate-800 text-slate-100" : "text-slate-400"
+          }`}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** 시뮬레이터 결과 상자 — tone은 값의 좋고 나쁨(색에만 쓴다). */
+export function SimStat({
+  label,
+  value,
+  sub,
+  tone = "plain",
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  tone?: "good" | "bad" | "muted" | "plain";
+}) {
+  const toneCls =
+    tone === "good"
+      ? "text-emerald-400"
+      : tone === "bad"
+        ? "text-rose-400"
+        : tone === "muted"
+          ? "text-slate-500"
+          : "text-slate-50";
+  return (
+    <div className="rounded-lg border border-slate-800 bg-slate-950/50 p-3">
+      <div className="text-[11px] text-slate-400">{label}</div>
+      <div className={`mt-1 text-xl font-semibold ${toneCls}`}>{value}</div>
+      {sub && <div className="text-[11px] text-slate-500">{sub}</div>}
+    </div>
+  );
 }

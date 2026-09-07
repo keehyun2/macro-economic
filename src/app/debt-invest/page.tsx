@@ -2,7 +2,7 @@ import { MultiLineChart, SingleAreaChart } from "@/components/charts";
 import { AsOfChip, Card, KpiTile, Note, SectionTitle } from "@/components/ui";
 import { loadAll } from "@/lib/data";
 import { kospi12mSeries, leverageSpreadSeries } from "@/lib/indicators";
-import { diffSeries, latest } from "@/lib/series";
+import { diffSeries, latest, since } from "@/lib/series";
 import { COLORS } from "@/lib/colors";
 import { fmtNum, fmtPct, fmtPp, fmtT } from "@/lib/format";
 
@@ -13,7 +13,8 @@ const SINCE = "2016-01"; // KOSPI 12M 수익률이 확보되는 시점부터
 export default async function DebtInvestPage() {
   const all = await loadAll();
   const creditLast = latest(all.credit.points);
-  const spread = leverageSpreadSeries(all).filter((p) => p.t >= SINCE);
+  const creditSince = since(all.credit.points, SINCE);
+  const spread = since(leverageSpreadSeries(all), SINCE);
   const spreadLast = latest(spread);
   const positiveRatio =
     spread.length > 0
@@ -73,13 +74,13 @@ export default async function DebtInvestPage() {
             name="신용대출 금리"
             unit="%"
             color={COLORS.credit}
-            points={all.credit.points.filter((p) => p.t >= SINCE)}
+            points={creditSince}
             refAreas={[{ from: "2021-09", to: "2023-01", label: "긴축 인상기" }]}
           />
         </Card>
         <Note>
-          참고: 이 시기 신용대출 평균 금리는 {fmtPct(creditAvg, 2)} (2006년 이후 전체 평균). 마진론
-          (증권사 신용융자) 금리는 통상 이보다 높다 — 손익분기선은 더 높게 잡아야 한다.
+          참고: 2006년 이후 전체 기간의 신용대출(신규) 평균 금리는 {fmtPct(creditAvg, 2)}다.
+          마진론(증권사 신용융자) 금리는 통상 이보다 높다 — 손익분기선은 더 높게 잡아야 한다.
         </Note>
       </section>
 
@@ -95,7 +96,7 @@ export default async function DebtInvestPage() {
               {
                 name: "신용대출(신규)",
                 color: COLORS.credit,
-                points: all.credit.points.filter((p) => p.t >= SINCE),
+                points: creditSince,
               },
               {
                 name: "회사채(3년, AA-)",
@@ -153,11 +154,11 @@ export default async function DebtInvestPage() {
             zeroLine
             legend={false}
             series={[
-              { name: "KOSPI 12M", color: COLORS.kospi, points: kospi12m.filter((p) => p.t >= SINCE) },
+              { name: "KOSPI 12M", color: COLORS.kospi, points: since(kospi12m, SINCE) },
               {
                 name: "차입 비용(신용대출)",
                 color: COLORS.credit,
-                points: all.credit.points.filter((p) => p.t >= SINCE),
+                points: creditSince,
               },
             ]}
           />

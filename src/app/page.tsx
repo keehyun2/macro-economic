@@ -10,7 +10,7 @@ import {
   realRateSeries,
 } from "@/lib/indicators";
 import { currentZ, PERSONAS, scorePersona } from "@/lib/personas";
-import { latest, pctChangeSeries, rollingSumSeries, yoySeries } from "@/lib/series";
+import { latest, pctChangeSeries, rollingSumSeries, since, yoySeries } from "@/lib/series";
 import { COLORS } from "@/lib/colors";
 import { fmtNum, fmtPct, fmtSigned, fmtT } from "@/lib/format";
 
@@ -18,8 +18,14 @@ export const revalidate = 21600; // 6시간 — ECOS 호출 보호
 
 const SINCE = "2015-01";
 
-function since(points: { t: string; v: number }[], from: string) {
-  return points.filter((p) => p.t >= from);
+/** 금리 변화의 화살표 색 — 대출자는 하락이 이득, 예금자는 상승이 이득. */
+function dirOf(
+  delta: number | null,
+  who: "borrower" | "saver"
+): "good" | "bad" | "flat" {
+  if (delta === null || delta === 0) return "flat";
+  const up = delta > 0;
+  return (who === "saver") === up ? "good" : "bad";
 }
 
 export default async function DashboardPage() {
@@ -57,7 +63,7 @@ export default async function DashboardPage() {
       <section>
         <SectionTitle
           title="지금 금융시장은"
-          sub="핵심 지표와 최근 3개월 변화 — 화살표 색은 특정 입장 기준이 아니라 대출자 입장 손해/이득 방향"
+          sub="핵심 지표와 최근 3개월 변화 — 화살표 색은 이름표 입장(대출자·예금자) 기준 이득·손해, 입장이 갈리는 지표는 무채색"
         />
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <KpiTile
@@ -71,22 +77,21 @@ export default async function DashboardPage() {
             value={fmtPct(factors.mortgage.latestValue)}
             delta={factorDeltaLabel(factors.mortgage)}
             sub="3개월 변화 · 영끌족 비용"
-            deltaDir={
-              factors.mortgage.delta !== null && factors.mortgage.delta > 0 ? "bad" : "flat"
-            }
+            deltaDir={dirOf(factors.mortgage.delta, "borrower")}
           />
           <KpiTile
             label="신용대출 금리(신규)"
             value={fmtPct(factors.credit.latestValue)}
             delta={factorDeltaLabel(factors.credit)}
             sub="3개월 변화 · 빚투족 비용"
-            deltaDir={factors.credit.delta !== null && factors.credit.delta > 0 ? "bad" : "flat"}
+            deltaDir={dirOf(factors.credit.delta, "borrower")}
           />
           <KpiTile
             label="정기예금(1년) 금리"
             value={fmtPct(factors.deposit.latestValue)}
             delta={factorDeltaLabel(factors.deposit)}
             sub="3개월 변화 · 예금족 수익"
+            deltaDir={dirOf(factors.deposit.delta, "saver")}
           />
           <KpiTile
             label="실질 정기예금 금리"
@@ -210,6 +215,26 @@ export default async function DashboardPage() {
           sub="페르소나 점수에는 들어가지 않지만 시장 방향을 읽는 배경 지표 — 경기·유동성·물가·경상수지"
         />
         <div className="grid gap-6 md:grid-cols-2">
+          <div className="md:col-span-2">
+            <h3 className="mb-1 text-xs font-medium text-slate-300">
+              경제심리지수(원계열) — 100 기준, 위=낙관 · 아래=비관
+            </h3>
+            <Card>
+              <MultiLineChart
+                height={200}
+                unit=""
+                legend={false}
+                refLineY={100}
+                series={[
+                  {
+                    name: "경제심리지수",
+                    color: COLORS.econSentiment,
+                    points: since(all.econSentiment.points, SINCE),
+                  },
+                ]}
+              />
+            </Card>
+          </div>
           <div>
             <h3 className="mb-1 text-xs font-medium text-slate-300">
               경기종합지수 순환변동치 — 선행 vs 동행 (100 기준)
@@ -287,6 +312,7 @@ export default async function DashboardPage() {
           </div>
         </div>
         <Note>
+          경제심리지수는 가계·기업 체감경기의 방향계로, 100을 크게 밑도는 구간은 비관 국면이다.
           선행지수가 동행지수보다 먼저 방향을 잡는다. 경상수지 흑자는 원화 강세 압력, 적자는
           약세 압력과 연결된다. 생산자물가는 소비자물가의 선행 압력으로 읽는다. 이 섹션의 지표는
           페르소나 점수 모델에는 반영되지 않는다.

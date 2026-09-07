@@ -52,10 +52,14 @@ function toPoints(def: SeriesDef, rows: EcosRow[]): Point[] {
     const v = Number(raw);
     if (!Number.isFinite(v)) continue;
     const t = normalizeTime(def.period, r.TIME);
-    const cur = byT.get(t) ?? { sum: 0, n: 0 };
-    cur.sum += v;
-    cur.n += 1;
-    byT.set(t, cur);
+    if (def.monthlyAvg) {
+      const cur = byT.get(t) ?? { sum: 0, n: 0 };
+      cur.sum += v;
+      cur.n += 1;
+      byT.set(t, cur);
+    } else {
+      byT.set(t, { sum: v, n: 1 }); // 월 1행 계열 — 중복 행이면 마지막 값(스크립트와 동일)
+    }
   }
   return [...byT.entries()]
     .sort((a, b) => (a[0] < b[0] ? -1 : 1))
