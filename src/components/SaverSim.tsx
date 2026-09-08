@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { MultiLineChart } from "@/components/charts";
-import { Card, PercentileBar, SegToggle, SectionTitle, SimStat } from "@/components/ui";
+import { Term } from "@/components/Term";
+import { Card, PercentileBar, SegToggle, SectionTitle, SimStat, SourceNote } from "@/components/ui";
 import { COLORS } from "@/lib/colors";
 import { delta, latest, since } from "@/lib/series";
 import { fmtManWon, fmtManWonSigned, fmtNum, fmtPct, fmtPp } from "@/lib/format";
@@ -77,7 +78,7 @@ export function SaverSim({
           }
         />
         <div className="mb-4 flex flex-wrap items-center gap-4">
-          <label className="flex items-center gap-3 text-sm text-soft">
+          <label className="flex flex-wrap items-center gap-3 text-sm text-soft">
             예치 원금
             <input
               type="range"
@@ -86,7 +87,7 @@ export function SaverSim({
               step={0.1}
               value={principalEok}
               onChange={(e) => setPrincipalEok(Number(e.target.value))}
-              className="w-48 accent-sky-400"
+              className="w-44 max-w-full accent-sky-400"
             />
             <span className="font-mono font-semibold text-sky-300">
               {fmtNum(principalEok * 10000, 0)}만원
@@ -124,7 +125,7 @@ export function SaverSim({
           />
           {realRate !== null && (
             <p className="mt-3 text-xs text-muted">
-              현재 세전 실질 스프레드는{" "}
+              현재 세전 <Term id="realSpread">실질 스프레드</Term>는{" "}
               <span className={realRate >= 0 ? "text-up" : "text-down"}>
                 {fmtPp(realRate, 1)}
               </span>
@@ -156,6 +157,10 @@ export function SaverSim({
           unit="만원"
           legend={false}
           series={[{ name: "월 이자", color: COLORS.deposit, points: chartPoints }]}
+        />
+        <SourceNote
+          source="한국은행 경제통계시스템(ECOS) — 정기예금(1년) 신규취급 금리로 계산"
+          asOf={latest(rates)?.t}
         />
       </Card>
     </div>

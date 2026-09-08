@@ -25,6 +25,7 @@ export default async function DataPage() {
       <section>
         <SectionTitle title="사용 통계표" sub={`${MONTHLY_DEFS.length}개 시계열 — 통계표코드/항목코드까지 전부 공개`} />
         <Card className="overflow-x-auto">
+          <p className="mb-2 text-xs text-dim md:hidden">화면이 좁으면 표를 좌우로 밀어 보세요.</p>
           <table className="w-full min-w-[720px] border-collapse text-xs">
             <thead>
               <tr className="text-left text-muted">

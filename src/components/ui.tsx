@@ -2,6 +2,7 @@
 // 색은 globals.css의 테마 토큰(bg-card, text-muted ...)만 써 다크/화이트가 함께 동작한다.
 import type { ReactNode } from "react";
 import type { PersonaScore, Verdict } from "@/lib/personas";
+import { fmtT } from "@/lib/format";
 
 export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
@@ -16,13 +17,14 @@ export function SectionTitle({
   sub,
   right,
 }: {
-  title: string;
-  sub?: string;
+  /** 용어 툴팁(Term)이 들어갈 수 있게 ReactNode를 받는다. */
+  title: ReactNode;
+  sub?: ReactNode;
   right?: ReactNode;
 }) {
   return (
-    <div className="mb-3 flex items-end justify-between gap-4">
-      <div>
+    <div className="mb-3 flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
+      <div className="min-w-0">
         <h2 className="text-base font-semibold text-strong">{title}</h2>
         {sub && <p className="mt-0.5 text-xs text-muted">{sub}</p>}
       </div>
@@ -38,7 +40,8 @@ export function KpiTile({
   deltaDir,
   sub,
 }: {
-  label: string;
+  /** 용어 툴팁(Term)이 들어갈 수 있게 ReactNode를 받는다. */
+  label: ReactNode;
   value: string;
   delta?: string;
   /** delta가 좋은 방향이면 'good', 나쁘면 'bad', 판단 보류 'flat' — 화살표 색에만 쓴다. */
@@ -56,10 +59,12 @@ export function KpiTile({
     <div className="rounded-xl border border-line bg-card p-4">
       <div className="text-xs text-muted">{label}</div>
       <div className="mt-1 text-2xl font-semibold tracking-tight text-strong">{value}</div>
-      <div className="mt-1 flex items-baseline gap-2 text-xs">
+      <div className="mt-1 flex flex-wrap items-baseline gap-x-2 text-xs">
         {delta && (
           <span className={`font-mono ${dirClass}`}>
-            {arrow} {delta}
+            {/* 방향은 delta의 부호가 이미 알려주므로 화살표는 장식으로 취급한다. */}
+            {arrow && <span aria-hidden="true">{arrow} </span>}
+            {delta}
           </span>
         )}
         {sub && <span className="text-dim">{sub}</span>}
@@ -104,13 +109,16 @@ export function PersonaCard({ ps }: { ps: PersonaScore }) {
         {ps.contributions.map((c) => (
           <span
             key={c.factor}
-            className={`rounded-full border px-2 py-0.5 text-xs font-mono ${
+            aria-label={`${c.label} ${c.factorZ > 0 ? "상승" : c.factorZ < 0 ? "하락" : "변동 미미"} 요인`}
+            className={`whitespace-nowrap rounded-full border px-2 py-0.5 text-xs font-mono ${
               c.impact > 0
                 ? "border-up/30 bg-up/10 text-up"
                 : "border-down/30 bg-down/10 text-down"
             }`}
           >
-            {c.label} {c.factorZ > 0 ? "↑" : c.factorZ < 0 ? "↓" : "·"}
+            <span aria-hidden="true">
+              {c.label} {c.factorZ > 0 ? "↑" : c.factorZ < 0 ? "↓" : "·"}
+            </span>
           </span>
         ))}
         {!ps.contributions.length && (
@@ -126,8 +134,8 @@ export function PercentileBar({ pct, label }: { pct: number | null; label: strin
   const tone = p >= 90 ? "역사적 최고준" : p >= 70 ? "높은 수준" : p >= 30 ? "중간" : p >= 10 ? "낮은 수준" : "최저준";
   return (
     <div>
-      <div className="flex items-baseline justify-between text-xs">
-        <span className="text-muted">{label}</span>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3 text-xs">
+        <span className="min-w-0 text-muted">{label}</span>
         <span className="font-mono text-soft">역사 상위 {p}% · {tone}</span>
       </div>
       <div className="relative mt-2 h-2 rounded-full bg-gradient-to-r from-info/30 via-line-strong to-down/30">
@@ -141,8 +149,10 @@ export function PercentileBar({ pct, label }: { pct: number | null; label: strin
 }
 
 export function AsOfChip({ children }: { children: ReactNode }) {
+  // inline-block + 줄바꿈 허용 — inline-flex면 내부 텍스트 조각이 저마다 글자 단위로
+  // 끊겨 이상하게 wrapping되므로, 흐르는 텍스트처럼 공백에서 줄바꿈되게 한다.
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-line-strong bg-inset px-3 py-1 text-xs text-muted">
+    <span className="inline-block max-w-full rounded-full border border-line-strong bg-inset px-3 py-1 text-xs leading-relaxed text-muted">
       {children}
     </span>
   );
@@ -150,6 +160,16 @@ export function AsOfChip({ children }: { children: ReactNode }) {
 
 export function Note({ children }: { children: ReactNode }) {
   return <p className="mt-2 text-xs leading-relaxed text-dim">{children}</p>;
+}
+
+/** 차트 하단의 출처·기준일 표기 — asOf는 'YYYY-MM'/'YYYYQn' 정규 시점. */
+export function SourceNote({ source, asOf }: { source: string; asOf?: string }) {
+  return (
+    <p className="mt-3 border-t border-line pt-2 text-xs text-dim">
+      출처: {source}
+      {asOf ? ` · 기준일 ${fmtT(asOf)}` : ""}
+    </p>
+  );
 }
 
 /** 시뮬레이터 등의 2분할 토글 (세전/세후, 변동/고정). */
@@ -163,14 +183,15 @@ export function SegToggle<T extends string>({
   options: { value: T; label: string }[];
 }) {
   return (
-    <div className="flex rounded-lg border border-line-strong p-0.5 text-xs">
+    <div className="flex flex-wrap rounded-lg border border-line-strong p-1 text-xs">
       {options.map((o) => (
         <button
           key={o.value}
           type="button"
+          aria-pressed={value === o.value}
           onClick={() => onChange(o.value)}
-          className={`rounded-md px-3 py-1 ${
-            value === o.value ? "bg-inset text-strong" : "text-muted"
+          className={`rounded-md px-3.5 py-2.5 transition-colors ${
+            value === o.value ? "bg-inset font-medium text-strong" : "text-muted hover:text-soft"
           }`}
         >
           {o.label}

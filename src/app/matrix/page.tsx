@@ -1,4 +1,4 @@
-import { Card, Note, SectionTitle } from "@/components/ui";
+import { AsOfChip, Card, Note, SectionTitle } from "@/components/ui";
 import { loadAll } from "@/lib/data";
 import {
   computeFactors,
@@ -10,6 +10,7 @@ import {
 import { PERSONAS, scorePersona, currentZ, type Z } from "@/lib/personas";
 import { latestAsOf } from "@/lib/data";
 import { stepBack, valueAsOf, yoySeries } from "@/lib/series";
+import { fmtT } from "@/lib/format";
 import type { Point } from "@/lib/series";
 import type { AllSeries } from "@/lib/data";
 
@@ -119,12 +120,15 @@ export default async function MatrixPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-xl font-bold text-strong">⚖️ 승자·패자 매트릭스</h1>
-        <p className="mt-1 text-sm text-muted">
-          같은 시장 움직임이 가계 유형마다 반대 방향으로 작동한다. 현재 상태와 8가지 시나리오에서
-          누가 이득이고 누가 손해인지 정렬해 본다.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold text-strong">⚖️ 승자·패자 매트릭스</h1>
+          <p className="mt-1 text-sm text-muted">
+            같은 시장 움직임이 가계 유형마다 반대 방향으로 작동한다. 현재 상태와 8가지 시나리오에서
+            누가 이득이고 누가 손해인지 정렬해 본다.
+          </p>
+        </div>
+        <AsOfChip>지표 시점 {fmtT(latestAsOf(all))}</AsOfChip>
       </div>
 
       <section>
@@ -142,7 +146,8 @@ export default async function MatrixPage() {
               >
                 <span className="text-soft">{def.label}</span>
                 <span className={`font-mono ${cls}`}>
-                  {dir} {factorValueLabel(f)}{" "}
+                  <span aria-hidden="true">{dir} </span>
+                  {factorValueLabel(f)}{" "}
                   <span className="text-dim">({factorDeltaLabel(f)})</span>
                 </span>
               </div>
@@ -157,6 +162,7 @@ export default async function MatrixPage() {
           sub="금리·물가·환율의 방향 조합별 점수. 노란 테두리 열 = 현재 시장 방향"
         />
         <Card className="overflow-x-auto">
+          <p className="mb-2 text-xs text-dim md:hidden">화면이 좁으면 표를 좌우로 밀어 보세요.</p>
           <table className="w-full min-w-[760px] border-collapse text-sm">
             <thead>
               <tr className="text-xs text-muted">

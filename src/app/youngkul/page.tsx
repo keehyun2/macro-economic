@@ -1,9 +1,10 @@
 import { YoungkulSim } from "@/components/YoungkulSim";
 import { MultiLineChart } from "@/components/charts";
-import { Card, Note, SectionTitle } from "@/components/ui";
+import { Term } from "@/components/Term";
+import { AsOfChip, Card, Note, SectionTitle, SourceNote } from "@/components/ui";
 import { loadAll } from "@/lib/data";
 import { houseYoYSeries, monthlyInterestSeries } from "@/lib/indicators";
-import { latest, since, yoySeries } from "@/lib/series";
+import { latest, latestTOf, since, yoySeries } from "@/lib/series";
 import { COLORS } from "@/lib/colors";
 import { fmtNum, fmtT, fmtTrillionWon } from "@/lib/format";
 
@@ -25,12 +26,15 @@ export default async function YoungkulPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-xl font-bold text-strong">🏠 영끌족 — 이자 부담의 무게</h1>
-        <p className="mt-1 text-sm text-muted">
-          고레버리지로 주택을 산 가계의 부담은 금리에서 출발한다. 공식 통계의 신규취급 금리로
-          월 이자를 계산하고, 역사 속 위치와 가계 주택관련대출 규모를 함께 본다.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold text-strong">🏠 영끌족 — 이자 부담의 무게</h1>
+          <p className="mt-1 text-sm text-muted">
+            고레버리지로 주택을 산 가계의 부담은 금리에서 출발한다. 공식 통계의 신규취급 금리로
+            월 이자를 계산하고, 역사 속 위치와 가계 주택관련대출 규모를 함께 본다.
+          </p>
+        </div>
+        <AsOfChip>주담대 금리 시점 {fmtT(mortgageLast?.t)} · 신규취급 평균</AsOfChip>
       </div>
 
       <YoungkulSim
@@ -69,12 +73,25 @@ export default async function YoungkulPage() {
               },
             ]}
           />
+          <SourceNote
+            source="한국은행 경제통계시스템(ECOS)"
+            asOf={latestTOf(
+              all.mortgageVar.points,
+              all.mortgageFixed.points,
+              all.baseRate.points
+            )}
+          />
         </Card>
       </section>
 
       <section>
         <SectionTitle
-          title="신규취급 vs 잔액 기준 — 지금 대출이 더 비쌀까?"
+          title={
+            <>
+              <Term id="newRate">신규취급</Term> vs <Term id="outRate">잔액 기준</Term> — 지금
+              대출이 더 비쌀까?
+            </>
+          }
           sub="신규 금리는 이번 달 시장을, 잔액 금리는 기존 대출자 전체의 평균 부담을 본다"
         />
         <Card>
@@ -98,6 +115,10 @@ export default async function YoungkulPage() {
                 dashed: true,
               },
             ]}
+          />
+          <SourceNote
+            source="한국은행 경제통계시스템(ECOS)"
+            asOf={latestTOf(all.mortgage.points, all.mortgageOut.points)}
           />
         </Card>
         <Note>
@@ -135,6 +156,10 @@ export default async function YoungkulPage() {
               },
             ]}
           />
+          <SourceNote
+            source="KB주택가격동향(ECOS 수록)"
+            asOf={latestTOf(houseYoYSeriesAll, jeonseYoY, jeonseAptYoY)}
+          />
         </Card>
         <Note>
           전세가 급등하는 시기(2020~2021)엔 &lsquo;전세 자낭비&rsquo; 논쟁과 함께 영끌(매수) 유인이 커지고,
@@ -168,6 +193,10 @@ export default async function YoungkulPage() {
               },
             ]}
           />
+          <SourceNote
+            source="한국은행 가계신용(ECOS)"
+            asOf={latestTOf(all.hhDebt.points, all.hhMortgageDebt.points)}
+          />
         </Card>
         <Note>
           가계신용(용도별) 분기 통계. 개별 가계의 부담이 아니라 전체 가계부채의 규모와 구조 — 금리
@@ -199,6 +228,10 @@ export default async function YoungkulPage() {
                 points: since(houseAptYoY, SINCE),
               },
             ]}
+          />
+          <SourceNote
+            source="KB주택가격동향(ECOS 수록)"
+            asOf={latestTOf(houseYoYSeriesAll, houseAptYoY)}
           />
         </Card>
       </section>

@@ -39,7 +39,7 @@
   --body: #e2e8f0;
   --soft: #cbd5e1;
   --muted: #94a3b8;
-  --dim: #64748b;
+  --dim: #8493a8; /* slate-500보다 밝게 — 12px 보조 텍스트도 4.5:1 대비 확보 */
   --up: #34d399; /* emerald-400 */
   --down: #fb7185; /* rose-400 */
   --info: #7dd3fc; /* sky-300 */
@@ -61,7 +61,7 @@
   --soft: #334155; /* slate-700 */
   --muted: #475569; /* slate-600 */
   --dim: #64748b; /* slate-500 */
-  --up: #059669; /* emerald-600 */
+  --up: #047857; /* emerald-700 — 흰 배경 위 12px 텍스트도 4.5:1 대비 */
   --down: #e11d48; /* rose-600 */
   --info: #0369a1; /* sky-700 */
   --accent: #b45309; /* amber-700 */
@@ -77,6 +77,18 @@ body {
     "Noto Sans KR",
     system-ui,
     sans-serif;
+  /* 용어 툴팁 등 절대 위치 요소가 화면 폭을 넘겨 가로 스크롤이 생기지 않게.
+     clip은 scroll container를 만들지 않아 sticky 헤더에 영향이 없다. */
+  overflow-x: clip;
+  /* 한글 줄바꿈: 단어(공백) 경계에서만 끊어 한 글자만 다음 줄로 넘어가는 일을 막는다.
+     공백 없는 긴 토큰(숫자·코드 등)이 줄보다 길 때만 비상 탈출을 허용한다. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* 모바일 터치 — 슬라이더(시뮬레이터)의 히트 영역을 기본보다 넓게. */
+input[type="range"] {
+  height: 1.75rem;
 }
 
 ::-webkit-scrollbar {

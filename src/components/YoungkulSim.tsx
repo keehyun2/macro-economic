@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { MultiLineChart } from "@/components/charts";
-import { Card, PercentileBar, SegToggle, SectionTitle, SimStat } from "@/components/ui";
+import { Term } from "@/components/Term";
+import { Card, PercentileBar, SegToggle, SectionTitle, SimStat, SourceNote } from "@/components/ui";
 import { COLORS } from "@/lib/colors";
 import { delta, latest, percentileOfLatest, since } from "@/lib/series";
 import { fmtManWon, fmtManWonSigned, fmtNum, fmtPct, fmtPp } from "@/lib/format";
@@ -93,9 +94,17 @@ export function YoungkulSim({
       <Card>
         <SectionTitle
           title="월 상환 시뮬레이터"
-          sub={`신규취급 평균금리 기준 · ${
-            amortizing ? `원리금균등상환(${Number(term)}년 만기)` : "만기일시 상환(이자만) 가정"
-          } · 데이터 시점 ${asOf}`}
+          sub={
+            <>
+              <Term id="newRate">신규취급</Term> 평균금리 기준 ·{" "}
+              {amortizing ? (
+                <Term id="amort">원리금균등상환({Number(term)}년 만기)</Term>
+              ) : (
+                <Term id="bullet">만기일시 상환(이자만)</Term>
+              )}{" "}
+              가정 · 데이터 시점 {asOf}
+            </>
+          }
           right={
             <SegToggle
               value={product}
@@ -108,7 +117,7 @@ export function YoungkulSim({
           }
         />
         <div className="mb-4 flex flex-wrap items-center gap-4">
-          <label className="flex items-center gap-3 text-sm text-soft">
+          <label className="flex flex-wrap items-center gap-3 text-sm text-soft">
             대출 원금
             <input
               type="range"
@@ -117,13 +126,13 @@ export function YoungkulSim({
               step={0.5}
               value={principalEok}
               onChange={(e) => setPrincipalEok(Number(e.target.value))}
-              className="w-48 accent-amber-400"
+              className="w-44 max-w-full accent-amber-400"
             />
             <span className="font-mono font-semibold text-amber-300">
               {fmtNum(principalEok, 1)}억원
             </span>
           </label>
-          <div className="flex items-center gap-2 text-sm text-soft">
+          <div className="flex flex-wrap items-center gap-2 text-sm text-soft">
             상환방식
             <SegToggle
               value={repay}
@@ -247,6 +256,10 @@ export function YoungkulSim({
           series={[
             { name: amortizing ? "월 납입액" : "월 이자", color, points: chartPoints },
           ]}
+        />
+        <SourceNote
+          source={`한국은행 경제통계시스템(ECOS) — ${product === "var" ? "변동형" : "고정형"} 주담대 신규취급 금리로 계산`}
+          asOf={latest(rates)?.t}
         />
       </Card>
     </div>

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { Nav } from "@/components/Nav";
@@ -46,6 +46,14 @@ export const metadata: Metadata = {
 
 // 첫 페인트 전에 저장된 테마를 <html>에 반영해 화이트 테마에서 다크 플래시가 나지 않게 한다.
 const themeInit = `try{if(localStorage.getItem("theme")==="light")document.documentElement.classList.add("light")}catch(e){}`;
+
+// 모바일 브라우저 상단 바 색 — 사이트는 자체 다크/화이트 토글을 쓰므로 OS 설정을 따라간다.
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0b1120" },
+    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
+  ],
+};
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

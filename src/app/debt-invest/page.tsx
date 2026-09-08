@@ -1,8 +1,9 @@
 import { MultiLineChart, SingleAreaChart } from "@/components/charts";
-import { AsOfChip, Card, KpiTile, Note, SectionTitle } from "@/components/ui";
+import { Term } from "@/components/Term";
+import { AsOfChip, Card, KpiTile, Note, SectionTitle, SourceNote } from "@/components/ui";
 import { loadAll } from "@/lib/data";
 import { kospi12mSeries, leverageSpreadSeries } from "@/lib/indicators";
-import { diffSeries, latest, since } from "@/lib/series";
+import { diffSeries, latest, latestTOf, since } from "@/lib/series";
 import { COLORS } from "@/lib/colors";
 import { fmtNum, fmtPct, fmtPp, fmtT } from "@/lib/format";
 
@@ -42,7 +43,7 @@ export default async function DebtInvestPage() {
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <KpiTile
-          label="빚투 손익분기 수익률"
+          label={<Term id="breakeven">빚투 손익분기 수익률</Term>}
           value={fmtPct(creditLast?.v ?? null)}
           sub={`신용대출(신규) ${fmtT(creditLast?.t)} — 연간 차입이자에 해당하는 단순 비교선`}
         />
@@ -52,7 +53,7 @@ export default async function DebtInvestPage() {
           sub={`재지수화 지수(2015=100) ${fmtNum(latest(all.kospi.points)?.v ?? null, 1)} · ${fmtT(latest(all.kospi.points)?.t)}`}
         />
         <KpiTile
-          label="레버리지 스프레드"
+          label={<Term id="leverageSpread">레버리지 스프레드</Term>}
           value={fmtPp(spreadLast?.v ?? null, 1)}
           sub="KOSPI 12M − 신용대출 금리 · +면 자산 수익이 차입비용을 넘는 구간"
           deltaDir={!spreadLast ? "flat" : spreadLast.v > 0 ? "good" : "bad"}
@@ -77,6 +78,10 @@ export default async function DebtInvestPage() {
             points={creditSince}
             refAreas={[{ from: "2021-09", to: "2023-01", label: "긴축 인상기" }]}
           />
+          <SourceNote
+            source="한국은행 경제통계시스템(ECOS)"
+            asOf={latestTOf(all.credit.points)}
+          />
         </Card>
         <Note>
           참고: 2006년 이후 전체 기간의 신용대출(신규) 평균 금리는 {fmtPct(creditAvg, 2)}다.
@@ -90,7 +95,12 @@ export default async function DebtInvestPage() {
 
       <section>
         <SectionTitle
-          title="차입비용의 시장판 — CD·회사채와 은행 금리"
+          title={
+            <>
+              차입비용의 시장판 — <Term id="cd91">CD</Term>·<Term id="corpBond">회사채</Term>와
+              은행 금리
+            </>
+          }
           sub="같은 &lsquo;빌리는 비용&rsquo;이라도 은행 신용대출·기업 회사채·단기 CD의 금리가 서로 다르다"
         />
         <Card>
@@ -120,6 +130,15 @@ export default async function DebtInvestPage() {
               },
             ]}
           />
+          <SourceNote
+            source="한국은행 경제통계시스템(ECOS)"
+            asOf={latestTOf(
+              all.credit.points,
+              all.corpBond3y.points,
+              all.cd91.points,
+              all.tbond3y.points
+            )}
+          />
         </Card>
         <Note>
           시장금리(국고채·CD·회사채)는 일별 시장에서 결정되는 &lsquo;돈의 도매가격&rsquo;이고, 은행
@@ -131,7 +150,11 @@ export default async function DebtInvestPage() {
 
       <section>
         <SectionTitle
-          title="레버리지 스프레드 — 빚투의 실제 성적표"
+          title={
+            <>
+              <Term id="leverageSpread">레버리지 스프레드</Term> — 빚투의 실제 성적표
+            </>
+          }
           sub="KOSPI 12개월 수익률 − 신용대출(신규) 금리. 0 위는 이득, 아래는 차입비용도 못 건진 구간"
         />
         <Card>
@@ -141,6 +164,10 @@ export default async function DebtInvestPage() {
             legend={false}
             series={[{ name: "레버리지 스프레드", color: COLORS.kospi, points: spread }]}
             refAreas={[{ from: "2021-09", to: "2023-01", label: "금리 인상기 · 빚투 실패 구간" }]}
+          />
+          <SourceNote
+            source="한국은행 ECOS — 주가지수·신용대출 금리로 계산"
+            asOf={latestTOf(spread)}
           />
         </Card>
         <Note>
@@ -165,6 +192,10 @@ export default async function DebtInvestPage() {
                 points: creditSince,
               },
             ]}
+          />
+          <SourceNote
+            source="한국은행 경제통계시스템(ECOS)"
+            asOf={latestTOf(kospi12m, all.credit.points)}
           />
         </Card>
       </section>

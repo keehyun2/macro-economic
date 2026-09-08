@@ -1,5 +1,6 @@
 import { MultiLineChart, SingleAreaChart } from "@/components/charts";
-import { AsOfChip, Card, KpiTile, Note, PersonaCard, SectionTitle } from "@/components/ui";
+import { Term } from "@/components/Term";
+import { AsOfChip, Card, KpiTile, Note, PersonaCard, SectionTitle, SourceNote } from "@/components/ui";
 import { asOfRange, loadAll, latestAsOf } from "@/lib/data";
 import { fetchDailyLatest } from "@/lib/ecos";
 import { FX_TODAY_DEF, MONTHLY_DEFS } from "@/lib/stat-codes";
@@ -11,7 +12,7 @@ import {
   realRateSeries,
 } from "@/lib/indicators";
 import { currentZ, PERSONAS, scorePersona } from "@/lib/personas";
-import { latest, pctChangeSeries, rollingSumSeries, since, valueAt, yoySeries } from "@/lib/series";
+import { latest, latestTOf, pctChangeSeries, rollingSumSeries, since, valueAt, yoySeries } from "@/lib/series";
 import { COLORS } from "@/lib/colors";
 import { fmtNum, fmtPct, fmtSigned, fmtT } from "@/lib/format";
 
@@ -90,7 +91,7 @@ export default async function DashboardPage() {
         />
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <KpiTile
-            label="한국은행 기준금리"
+            label={<Term id="baseRate">한국은행 기준금리</Term>}
             value={fmtPct(factors.baseRate.latestValue)}
             delta={factorDeltaLabel(factors.baseRate)}
             sub="3개월 변화"
@@ -117,7 +118,7 @@ export default async function DashboardPage() {
             deltaDir={dirOf(factors.deposit.delta, "saver")}
           />
           <KpiTile
-            label="실질 스프레드(세전)"
+            label={<Term id="realSpread">실질 스프레드(세전)</Term>}
             value={fmtPct(latest(realDeposit)?.v ?? null)}
             sub={`예금금리 ${fmtPct(latest(all.deposit.points)?.v ?? null, 1)} − 물가 ${fmtPct(
               cpiYoyAtDeposit ?? latest(cpiYoy)?.v ?? null,
@@ -125,7 +126,7 @@ export default async function DashboardPage() {
             )} · 세전 단순 비교`}
           />
           <KpiTile
-            label="물가 상승률(CPI 전년비)"
+            label={<Term id="yoy">물가 상승률(CPI 전년비)</Term>}
             value={fmtPct(factors.cpiYoy.latestValue, 1)}
             delta={factorDeltaLabel(factors.cpiYoy)}
             sub="3개월 변화"
@@ -173,6 +174,16 @@ export default async function DashboardPage() {
               { name: "정기예금(1년)", color: COLORS.deposit, points: since(all.deposit.points, SINCE) },
             ]}
           />
+          <SourceNote
+            source="한국은행 경제통계시스템(ECOS)"
+            asOf={latestTOf(
+              all.baseRate.points,
+              all.tbond3y.points,
+              all.mortgage.points,
+              all.credit.points,
+              all.deposit.points
+            )}
+          />
         </Card>
       </section>
 
@@ -180,7 +191,12 @@ export default async function DashboardPage() {
         <div>
           <SectionTitle
             title="물가와 실질 스프레드"
-            sub="CPI 전년비 vs 실질 정기예금 스프레드(예금금리 − 물가, 세전 단순 비교)"
+            sub={
+              <>
+                CPI 전년비 vs 실질 정기예금 스프레드(예금금리 − 물가, 세전 단순 비교) — 용어는{" "}
+                <Term id="realSpread">실질 스프레드</Term> 설명 참조
+              </>
+            }
           />
           <Card>
             <MultiLineChart
@@ -191,10 +207,14 @@ export default async function DashboardPage() {
                 { name: "실질 스프레드(세전)", color: COLORS.realRate, points: since(realDeposit, SINCE) },
               ]}
             />
+            <SourceNote
+              source="통계청 소비자물가 · 한국은행 ECOS"
+              asOf={latestTOf(cpiYoy, realDeposit)}
+            />
           </Card>
         </div>
         <div>
-          <SectionTitle title="원/달러 환율" sub="월평균 매매기준율" />
+          <SectionTitle title="원/달러 환율" sub={<>월평균 <Term id="fxBasis">매매기준율</Term></>} />
           <Card>
             <SingleAreaChart
               name="원/달러"
@@ -202,6 +222,7 @@ export default async function DashboardPage() {
               color={COLORS.usdkrw}
               points={since(all.usdkrw.points, SINCE)}
             />
+            <SourceNote source="한국은행 경제통계시스템(ECOS)" asOf={latestTOf(all.usdkrw.points)} />
           </Card>
         </div>
       </section>
@@ -209,7 +230,12 @@ export default async function DashboardPage() {
       <section>
         <SectionTitle
           title="자산 시장"
-          sub="KOSPI(월평균, 2015=100)와 KB 주택매매가격 전년동월비"
+          sub={
+            <>
+              KOSPI(월평균, <Term id="kospiRebased">2015=100 재지수화</Term>)와 KB 주택매매가격
+              전년동월비
+            </>
+          }
         />
         <div className="grid gap-6 md:grid-cols-2">
           <Card>
@@ -218,6 +244,7 @@ export default async function DashboardPage() {
               color={COLORS.kospi}
               points={since(all.kospi.points, SINCE)}
             />
+            <SourceNote source="한국은행 ECOS 국제 주요국 주가지수" asOf={latestTOf(all.kospi.points)} />
           </Card>
           <Card>
             <MultiLineChart
@@ -232,6 +259,7 @@ export default async function DashboardPage() {
                 },
               ]}
             />
+            <SourceNote source="KB주택가격동향(ECOS 수록)" asOf={latestTOf(houseYoY)} />
           </Card>
         </div>
       </section>
@@ -243,7 +271,7 @@ export default async function DashboardPage() {
         <div className="grid gap-6 md:grid-cols-2">
           <div className="md:col-span-2">
             <h3 className="mb-1 text-xs font-medium text-soft">
-              경제심리지수(원계열) — 100 기준, 위=낙관 · 아래=비관
+              <Term id="econSentiment">경제심리지수</Term>(원계열) — 100 기준, 위=낙관 · 아래=비관
             </h3>
             <Card>
               <MultiLineChart
@@ -259,11 +287,15 @@ export default async function DashboardPage() {
                   },
                 ]}
               />
+              <SourceNote
+                source="한국은행 경제통계시스템(ECOS)"
+                asOf={latestTOf(all.econSentiment.points)}
+              />
             </Card>
           </div>
           <div>
             <h3 className="mb-1 text-xs font-medium text-soft">
-              경기종합지수 순환변동치 — 선행 vs 동행 (100 기준)
+              경기종합지수 <Term id="cycleVar">순환변동치</Term> — 선행 vs 동행 (100 기준)
             </h3>
             <Card>
               <MultiLineChart
@@ -285,10 +317,16 @@ export default async function DashboardPage() {
                   },
                 ]}
               />
+              <SourceNote
+                source="한국은행·통계청 경기종합지수(ECOS)"
+                asOf={latestTOf(all.leadingIdx.points, all.coincidentIdx.points)}
+              />
             </Card>
           </div>
           <div>
-            <h3 className="mb-1 text-xs font-medium text-soft">M2(광의통화) 전년비 — 유동성</h3>
+            <h3 className="mb-1 text-xs font-medium text-soft">
+              <Term id="m2">M2(광의통화)</Term> 전년비 — 유동성
+            </h3>
             <Card>
               <MultiLineChart
                 height={220}
@@ -297,11 +335,12 @@ export default async function DashboardPage() {
                 legend={false}
                 series={[{ name: "M2 전년비", color: COLORS.m2, points: since(m2YoY, SINCE) }]}
               />
+              <SourceNote source="한국은행 경제통계시스템(ECOS)" asOf={latestTOf(m2YoY)} />
             </Card>
           </div>
           <div>
             <h3 className="mb-1 text-xs font-medium text-soft">
-              경상수지 12개월 이동합 — 원화의 기본배경
+              <Term id="currentAccount">경상수지</Term> 12개월 이동합 — 원화의 기본배경
             </h3>
             <Card>
               <SingleAreaChart
@@ -312,6 +351,7 @@ export default async function DashboardPage() {
                 points={since(bop12m, SINCE)}
                 zeroLine
               />
+              <SourceNote source="한국은행 국제수지(ECOS)" asOf={latestTOf(bop12m)} />
             </Card>
           </div>
           <div>
@@ -333,6 +373,10 @@ export default async function DashboardPage() {
                     dashed: true,
                   },
                 ]}
+              />
+              <SourceNote
+                source="통계청 소비자·생산자물가(ECOS 수록)"
+                asOf={latestTOf(cpiYoy, ppiYoy)}
               />
             </Card>
           </div>

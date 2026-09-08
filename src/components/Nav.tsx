@@ -22,7 +22,8 @@ export function Nav() {
           <Link
             key={l.href}
             href={l.href}
-            className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-sm transition-colors ${
+            aria-current={active ? "page" : undefined}
+            className={`whitespace-nowrap rounded-lg px-3 py-2 text-sm transition-colors ${
               active
                 ? "bg-inset font-medium text-strong"
                 : "text-muted hover:bg-hover hover:text-soft"

@@ -97,6 +97,7 @@ export function MultiLineChart({
   refLineY,
   refAreas = [],
   legend = true,
+  ariaLabel,
 }: {
   series: LineSpec[];
   height?: number;
@@ -106,13 +107,19 @@ export function MultiLineChart({
   refLineY?: number;
   refAreas?: RefAreaSpec[];
   legend?: boolean;
+  /** 보조기기용 요약 — 없으면 시리즈 이름으로 만든다. role="img"로 SVG 내부는 장식 취급. */
+  ariaLabel?: string;
 }) {
   const c = useChartColors();
   const axis = { stroke: c.axis, fontSize: 12 };
   const rows = mergeRows(series);
   const dashedNames = new Set(series.filter((s) => s.dashed).map((s) => s.name));
   return (
-    <ResponsiveContainer width="100%" height={height}>
+    <div
+      role="img"
+      aria-label={ariaLabel ?? `${series.map((s) => s.name).join(", ")} 시계열 차트`}
+    >
+      <ResponsiveContainer width="100%" height={height}>
       <LineChart data={rows} margin={{ top: 8, right: 12, bottom: 0, left: -8 }}>
         <CartesianGrid stroke={c.grid} strokeDasharray="3 3" />
         <XAxis dataKey="t" tick={axis} tickFormatter={tick} minTickGap={48} />
@@ -145,7 +152,8 @@ export function MultiLineChart({
           />
         ))}
       </LineChart>
-    </ResponsiveContainer>
+      </ResponsiveContainer>
+    </div>
   );
 }
 
@@ -157,6 +165,7 @@ export function SingleAreaChart({
   unit = "",
   zeroLine = false,
   refAreas = [],
+  ariaLabel,
 }: {
   name: string;
   points: Point[];
@@ -165,11 +174,14 @@ export function SingleAreaChart({
   unit?: string;
   zeroLine?: boolean;
   refAreas?: RefAreaSpec[];
+  /** 보조기기용 요약 — role="img"로 SVG 내부는 장식 취급. */
+  ariaLabel?: string;
 }) {
   const c = useChartColors();
   const axis = { stroke: c.axis, fontSize: 12 };
   return (
-    <ResponsiveContainer width="100%" height={height}>
+    <div role="img" aria-label={ariaLabel ?? `${name} 시계열 차트`}>
+      <ResponsiveContainer width="100%" height={height}>
       <AreaChart data={points} margin={{ top: 8, right: 12, bottom: 0, left: -8 }}>
         <defs>
           <linearGradient id={`grad-${name}`} x1="0" y1="0" x2="0" y2="1">
@@ -202,6 +214,7 @@ export function SingleAreaChart({
           isAnimationActive={false}
         />
       </AreaChart>
-    </ResponsiveContainer>
+      </ResponsiveContainer>
+    </div>
   );
 }

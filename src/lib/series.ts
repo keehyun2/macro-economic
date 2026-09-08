@@ -40,6 +40,16 @@ export function latest(points: Point[]): Point | undefined {
   return points.length ? points[points.length - 1] : undefined;
 }
 
+/** 한 차트에 함께 그린 시계열들의 기준일 — 시리즈 중 가장 늦은 관측시점. */
+export function latestTOf(...lists: Point[][]): string | undefined {
+  let out: string | undefined;
+  for (const pts of lists) {
+    const t = pts[pts.length - 1]?.t;
+    if (t && (!out || tIndex(t) > tIndex(out))) out = t;
+  }
+  return out;
+}
+
 export function valueAt(points: Point[], t: string): number | null {
   for (let i = points.length - 1; i >= 0; i--)
     if (points[i].t === t) return points[i].v;

@@ -1,9 +1,10 @@
 import { SaverSim } from "@/components/SaverSim";
 import { MultiLineChart, SingleAreaChart } from "@/components/charts";
-import { AsOfChip, Card, KpiTile, Note, SectionTitle } from "@/components/ui";
+import { Term } from "@/components/Term";
+import { AsOfChip, Card, KpiTile, Note, SectionTitle, SourceNote } from "@/components/ui";
 import { loadAll } from "@/lib/data";
 import { cpiYoySeries, monthlyInterestSeries, realRateSeries } from "@/lib/indicators";
-import { latest, percentileOfLatest, since, valueAt, yoySeries } from "@/lib/series";
+import { latest, latestTOf, percentileOfLatest, since, valueAt, yoySeries } from "@/lib/series";
 import { COLORS } from "@/lib/colors";
 import { fmtPct, fmtT, fmtTrillionWon } from "@/lib/format";
 
@@ -35,9 +36,11 @@ export default async function SaverPage() {
           <h1 className="text-xl font-bold text-strong">🏦 예금족 — 물가와의 싸움</h1>
           <p className="mt-1 text-sm text-muted">
             예금·적금으로 모으는 가계의 승부처는{' '}
-            <b className="text-body">실질 스프레드 = 예금금리 − 물가상승률</b>이다. 세전
-            단순 비교지만 방향을 읽는 데는 충분하다. 공식 통계로 이자가 물가를 이겼던 시절과
-            진 구간을 본다.
+            <b className="text-body">
+              <Term id="realSpread">실질 스프레드</Term> = 예금금리 − 물가상승률
+            </b>
+            이다. 세전 단순 비교지만 방향을 읽는 데는 충분하다. 공식 통계로 이자가 물가를 이겼던
+            시절과 진 구간을 본다.
           </p>
         </div>
         <AsOfChip>예금금리 시점 {fmtT(depLast?.t)} · 은행 신규취급 평균</AsOfChip>
@@ -50,12 +53,12 @@ export default async function SaverPage() {
           sub={`신규취급 평균 · ${fmtT(depLast?.t)}`}
         />
         <KpiTile
-          label="물가 상승률(CPI 전년비)"
+          label={<Term id="yoy">물가 상승률(CPI 전년비)</Term>}
           value={fmtPct(cpiYoyAtDeposit, 1)}
           sub={`예금금리 시점(${fmtT(depLast?.t)})에 맞춘 값 — 메인 대시보드의 최신 CPI와 시점이 달라 오차가 아니다`}
         />
         <KpiTile
-          label="실질 스프레드(세전)"
+          label={<Term id="realSpread">실질 스프레드(세전)</Term>}
           value={fmtPct(realLast?.v ?? null, 1)}
           deltaDir={
             !realLast || realLast.v === 0 ? "flat" : realLast.v > 0 ? "good" : "bad"
@@ -81,7 +84,12 @@ export default async function SaverPage() {
       <section>
         <SectionTitle
           title="같은 은행, 다른 금리 — 예금 상품별"
-          sub="정기예금·정기적금은 신규취급 평균, MMDA는 잔액 기준 평균이라 서열이 갈린다"
+          sub={
+            <>
+              정기예금·정기적금은 <Term id="newRate">신규취급</Term> 평균,{" "}
+              <Term id="mmda">MMDA</Term>는 잔액 기준 평균이라 서열이 갈린다
+            </>
+          }
         />
         <Card>
           <MultiLineChart
@@ -104,6 +112,10 @@ export default async function SaverPage() {
                 dashed: true,
               },
             ]}
+          />
+          <SourceNote
+            source="한국은행 경제통계시스템(ECOS)"
+            asOf={latestTOf(all.deposit.points, all.savings.points, all.mmda.points)}
           />
         </Card>
         <Note>
@@ -150,6 +162,10 @@ export default async function SaverPage() {
               { from: "2021-09", to: "2023-01", label: "긴축 인상기 · 실질손실 절정" },
             ]}
           />
+          <SourceNote
+            source="한국은행 ECOS · 통계청 소비자·생산자물가(ECOS 수록)"
+            asOf={latestTOf(all.deposit.points, cpiYoy, yoySeries(all.ppi.points), realDeposit)}
+          />
         </Card>
         <Note>
           2020~2023년엔 예금금리가 물가를 따라가지 못해 실질 스프레드가 깊은 마이너스에 빠졌다 —
@@ -189,6 +205,10 @@ export default async function SaverPage() {
               },
             ]}
           />
+          <SourceNote
+            source="한국은행 경제통계시스템(ECOS)"
+            asOf={latestTOf(all.deposit.points, all.tbond3y.points, all.baseRate.points)}
+          />
         </Card>
         <Note>
           인상기에는 시장금리(국고채)가 먼저 오르고 은행 예금금리는 늦게 따라오고, 인하기에는
@@ -209,6 +229,10 @@ export default async function SaverPage() {
             unit="조원"
             color={COLORS.bankDeposits}
             points={since(depositsTrillion, SINCE)}
+          />
+          <SourceNote
+            source="한국은행 경제통계시스템(ECOS)"
+            asOf={latestTOf(all.bankDeposits.points)}
           />
         </Card>
         <Note>
