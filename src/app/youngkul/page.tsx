@@ -110,7 +110,7 @@ export default async function YoungkulPage() {
       <section>
         <SectionTitle
           title="매매가 vs 전세가 — 영끌의 기회비용"
-          sub="KB 매매·전세가격지수(전국) 전년동월비. 전세가 더 오르는 시기엔 사는 쪽이 상대적으로 유리해진다"
+          sub="KB 매매·전세가격지수(전국) 전년동월비. 전세가 더 오르는 시기엔 매수 유인이 커질 수 있다"
         />
         <Card>
           <MultiLineChart
@@ -138,7 +138,9 @@ export default async function YoungkulPage() {
         </Card>
         <Note>
           전세가 급등하는 시기(2020~2021)엔 &lsquo;전세 자낭비&rsquo; 논쟁과 함께 영끌(매수) 유인이 커지고,
-          전세가 안정되면 대출 이자를 감수할 이유가 줄어든다. 두 지수의 방향 차이는 주택 시장의
+          전세가 안정되면 대출 이자를 감수할 이유가 줄어든다. 다만 매수와 임차 중 어느 쪽이
+          유리한지는 전세가율, 대출금리, 보유세와 거래비용, 집값 전망을 함께 봐야 한다 — 전세가
+          상승만으로 매수가 유리해진다고 단정할 수 없다. 두 지수의 방향 차이는 주택 시장의
           수요가 사려는 쪽인지 빌리려는 쪽인지로 쏠렸는지를 보여준다.
         </Note>
       </section>
@@ -170,9 +172,12 @@ export default async function YoungkulPage() {
         <Note>
           가계신용(용도별) 분기 통계. 개별 가계의 부담이 아니라 전체 가계부채의 규모와 구조 — 금리
           변화가 이 잔액 전체에 어떤 이자 비용을 물리는지 상상하는 배경 지표다. 예: 가계대출{" "}
-          {fmtTrillionWon(latest(all.hhDebt.points)?.v)}에서 금리가 1%p 오르면 연간 약{" "}
-          {fmtNum(((latest(all.hhDebt.points)?.v ?? 0) / 1000) * 0.01, 0)}조원의 추가 이자 부담에
-          해당한다.
+          {fmtTrillionWon(latest(all.hhDebt.points)?.v)}의 잔액 전체가 즉시 1%p 높은 금리로
+          재가격된다고 가정하면 연간 약{" "}
+          {fmtNum(((latest(all.hhDebt.points)?.v ?? 0) / 1000) * 0.01, 0)}조원 — 모든 잔액이
+          즉시 재가격되는 정태적 상한 계산이다. 실제 추가 이자는 이보다 작다: 고정금리 대출은
+          만기·재고정 시점에, 변동금리 대출도 재고정 주기에 따라 반영되고, 그 사이 상환·신규가
+          계속 일어나며 업권·상품별 금리 수준도 다르기 때문이다.
         </Note>
       </section>
 

@@ -44,21 +44,21 @@ export default async function DebtInvestPage() {
         <KpiTile
           label="빚투 손익분기 수익률"
           value={fmtPct(creditLast?.v ?? null)}
-          sub={`신용대출(신규) ${fmtT(creditLast?.t)} — 이 수익률을 넘어야 본전`}
+          sub={`신용대출(신규) ${fmtT(creditLast?.t)} — 연간 차입이자에 해당하는 단순 비교선`}
         />
         <KpiTile
           label="KOSPI 12개월 수익률"
           value={fmtPct(latest(kospi12m)?.v ?? null, 1)}
-          sub={`지수 ${fmtNum(latest(all.kospi.points)?.v ?? null, 1)} (${fmtT(latest(all.kospi.points)?.t)})`}
+          sub={`재지수화 지수(2015=100) ${fmtNum(latest(all.kospi.points)?.v ?? null, 1)} · ${fmtT(latest(all.kospi.points)?.t)}`}
         />
         <KpiTile
           label="레버리지 스프레드"
           value={fmtPp(spreadLast?.v ?? null, 1)}
-          sub="KOSPI 12M − 신용대출 금리 · +면 빚투 성공 구간"
+          sub="KOSPI 12M − 신용대출 금리 · +면 자산 수익이 차입비용을 넘는 구간"
           deltaDir={!spreadLast ? "flat" : spreadLast.v > 0 ? "good" : "bad"}
         />
         <KpiTile
-          label="역사상 빚투 유리했던 비중"
+          label="역사상 스프레드 플러스 비중"
           value={positiveRatio === null ? "–" : `${positiveRatio}%`}
           sub={`2016년 이후 월 중 스프레드 > 0`}
         />
@@ -67,7 +67,7 @@ export default async function DebtInvestPage() {
       <section>
         <SectionTitle
           title="손익분기 수익률의 역사"
-          sub="신용대출(신규) 금리 — 이 선 아래로 떨어지는 해에는 빚투가 본전도 안 된다"
+          sub="신용대출(신규) 금리 — 자산 수익률이 이 선을 넘어야 연간 차입이자를 덮는다(세전 단순 비교)"
         />
         <Card>
           <SingleAreaChart
@@ -81,6 +81,10 @@ export default async function DebtInvestPage() {
         <Note>
           참고: 2006년 이후 전체 기간의 신용대출(신규) 평균 금리는 {fmtPct(creditAvg, 2)}다.
           마진론(증권사 신용융자) 금리는 통상 이보다 높다 — 손익분기선은 더 높게 잡아야 한다.
+          이 비교선은 연간 차입이자에 해당하는 단순 기준이라 세금·거래비용·변동성·상환 방식은
+          반영하지 않는다. 또 KOSPI 수익률은 배당이 빠진 가격수익률이다 — 배당을 포함한
+          총수익률로 재면 자산 성과는 이보다 낫게 나오고, 세금과 거래비용을 넣으면 그만큼
+          깎인다. 방향 읽기용 하한선으로 볼 것.
         </Note>
       </section>
 

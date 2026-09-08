@@ -46,6 +46,9 @@ export function SaverSim({
     monthlyNow !== null && cpiYoy !== null
       ? monthlyNow * 12 - (principalEok * 1e8 * cpiYoy) / 100
       : null;
+  // 세후 실질수익률(근사, 단리) = 세후 명목금리 − CPI 전년비 — 세전 스프레드(realRate)와 병기용
+  const realAfterTax =
+    rateNow !== null && cpiYoy !== null ? rateNow * (1 - TAX) - cpiYoy : null;
 
   const chartPoints = useMemo(
     () =>
@@ -121,14 +124,24 @@ export function SaverSim({
           />
           {realRate !== null && (
             <p className="mt-3 text-xs text-muted">
-              현재 실질예금금리는{" "}
+              현재 세전 실질 스프레드는{" "}
               <span className={realRate >= 0 ? "text-up" : "text-down"}>
                 {fmtPp(realRate, 1)}
-              </span>{" "}
-              —{" "}
-              {realRate >= 0
-                ? "예금 이자가 물가 상승분을 넘어 구매력이 불어나는 구간이다."
-                : "물가가 이자를 깎아먹어 원금의 구매력이 줄어드는 구간이다."}
+              </span>
+              , 이자소득세 15.4%를 빼면 세후 실질수익률(근사)은{" "}
+              {realAfterTax !== null && (
+                <span className={realAfterTax >= 0 ? "text-up" : "text-down"}>
+                  {fmtPp(realAfterTax, 1)}
+                </span>
+              )}
+              다 —{" "}
+              {realAfterTax === null
+                ? ""
+                : realAfterTax >= 0
+                ? "세후 이자가 물가 상승분을 넘어 구매력이 불어나는 구간이다."
+                : "세후 이자가 물가 상승분을 따라가지 못해 원금의 구매력이 줄어드는 구간이다."}
+              {realRate >= 0 && realAfterTax !== null && realAfterTax < 0 &&
+                " 세전엔 플러스여도 세후로는 마이너스로 뒤집힐 수 있다."}
             </p>
           )}
         </div>

@@ -4,7 +4,7 @@ import { cache } from "react";
 import snapsJson from "../../data/snapshots.json";
 import { SERIES_BY_KEY, SERIES_KEYS } from "./stat-codes";
 import { fetchSeriesLive } from "./ecos";
-import { tIndex, type Point } from "./series";
+import { fromMonthIndex, isQuarter, tIndex, type Point } from "./series";
 
 export interface LoadedSeries {
   key: string;
@@ -60,4 +60,19 @@ export function latestAsOf(all: AllSeries): string {
     }
   }
   return maxT;
+}
+
+/** 지표별 최신 관측시점의 범위(헤더 칩 표기용) — 분기 계열은 관측 월(분기 말)로 환산한다. */
+export function asOfRange(all: AllSeries): { min: string; max: string } {
+  let minIdx = Infinity;
+  let maxIdx = -Infinity;
+  for (const s of Object.values(all)) {
+    const t = s.points[s.points.length - 1]?.t;
+    if (!t) continue;
+    const idx = tIndex(t) + (isQuarter(t) ? 2 : 0);
+    if (idx < minIdx) minIdx = idx;
+    if (idx > maxIdx) maxIdx = idx;
+  }
+  if (minIdx === Infinity) return { min: "", max: "" };
+  return { min: fromMonthIndex(minIdx), max: fromMonthIndex(maxIdx) };
 }

@@ -1,6 +1,6 @@
 import { MultiLineChart, SingleAreaChart } from "@/components/charts";
 import { AsOfChip, Card, KpiTile, Note, PersonaCard, SectionTitle } from "@/components/ui";
-import { loadAll, latestAsOf } from "@/lib/data";
+import { asOfRange, loadAll, latestAsOf } from "@/lib/data";
 import { fetchDailyLatest } from "@/lib/ecos";
 import { FX_TODAY_DEF, MONTHLY_DEFS } from "@/lib/stat-codes";
 import {
@@ -11,7 +11,7 @@ import {
   realRateSeries,
 } from "@/lib/indicators";
 import { currentZ, PERSONAS, scorePersona } from "@/lib/personas";
-import { latest, pctChangeSeries, rollingSumSeries, since, yoySeries } from "@/lib/series";
+import { latest, pctChangeSeries, rollingSumSeries, since, valueAt, yoySeries } from "@/lib/series";
 import { COLORS } from "@/lib/colors";
 import { fmtNum, fmtPct, fmtSigned, fmtT } from "@/lib/format";
 
@@ -43,6 +43,9 @@ export default async function DashboardPage() {
 
   const cpiYoy = cpiYoySeries(all);
   const realDeposit = realRateSeries(all.deposit.points, all.cpi.points);
+  // 실질 스프레드 표기는 예금금리 관측월의 CPI로 맞춘다(공표 시차로 최신 CPI와 달라진다).
+  const depositLastT = latest(all.deposit.points)?.t;
+  const cpiYoyAtDeposit = depositLastT ? valueAt(cpiYoy, depositLastT) : null;
   const kospi3m = pctChangeSeries(all.kospi.points, 3);
   const houseYoY = houseYoYSeries(all);
   const ppiYoy = yoySeries(all.ppi.points);
@@ -54,12 +57,16 @@ export default async function DashboardPage() {
   }));
 
   const asOf = latestAsOf(all);
+  const obsRange = asOfRange(all);
   const liveCount = Object.values(all).filter((s) => s.live).length;
 
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-center gap-2">
-        <AsOfChip>📊 데이터 시점 {fmtT(asOf)} (지표별 상이 · /data 참조)</AsOfChip>
+        <AsOfChip>
+          📊 최종 업데이트 {fmtT(asOf)} · 지표별 관측시점 {fmtT(obsRange.min)}~{fmtT(obsRange.max)}{" "}
+          (/data 참조)
+        </AsOfChip>
         <AsOfChip>
           {liveCount > 0
             ? `🟢 live ${liveCount}/${MONTHLY_DEFS.length} · ECOS 직접 조회`
@@ -110,9 +117,12 @@ export default async function DashboardPage() {
             deltaDir={dirOf(factors.deposit.delta, "saver")}
           />
           <KpiTile
-            label="실질 정기예금 금리"
+            label="실질 스프레드(세전)"
             value={fmtPct(latest(realDeposit)?.v ?? null)}
-            sub={`예금금리 ${fmtPct(latest(all.deposit.points)?.v ?? null, 1)} − 물가 ${fmtPct(latest(cpiYoy)?.v ?? null, 1)}`}
+            sub={`예금금리 ${fmtPct(latest(all.deposit.points)?.v ?? null, 1)} − 물가 ${fmtPct(
+              cpiYoyAtDeposit ?? latest(cpiYoy)?.v ?? null,
+              1
+            )} · 세전 단순 비교`}
           />
           <KpiTile
             label="물가 상승률(CPI 전년비)"
@@ -127,9 +137,9 @@ export default async function DashboardPage() {
             sub="월평균 · 3개월 변화"
           />
           <KpiTile
-            label="KOSPI · 주택매매가"
+            label="KOSPI(2015=100) · 주택매매가"
             value={`${fmtSigned(latest(kospi3m)?.v ?? null, 1, "%")} / ${fmtSigned(latest(houseYoY)?.v ?? null, 1, "%")}`}
-            sub={`KOSPI 3개월 · 주택가격 전년비 (지수 ${fmtNum(latest(all.kospi.points)?.v ?? null, 0)})`}
+            sub={`KOSPI 3개월 · 주택가격 전년비 · 지수는 재지수화(2015=100) 값이라 공식 KOSPI 포인트와 다름`}
           />
         </div>
       </section>
@@ -169,8 +179,8 @@ export default async function DashboardPage() {
       <section className="grid gap-6 md:grid-cols-2">
         <div>
           <SectionTitle
-            title="물가와 실질금리"
-            sub="CPI 전년비 vs 실질 정기예금 금리(예금금리 − 물가)"
+            title="물가와 실질 스프레드"
+            sub="CPI 전년비 vs 실질 정기예금 스프레드(예금금리 − 물가, 세전 단순 비교)"
           />
           <Card>
             <MultiLineChart
@@ -178,7 +188,7 @@ export default async function DashboardPage() {
               zeroLine
               series={[
                 { name: "물가 상승률", color: COLORS.cpiYoy, points: since(cpiYoy, SINCE) },
-                { name: "실질 예금금리", color: COLORS.realRate, points: since(realDeposit, SINCE) },
+                { name: "실질 스프레드(세전)", color: COLORS.realRate, points: since(realDeposit, SINCE) },
               ]}
             />
           </Card>

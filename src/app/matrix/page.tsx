@@ -63,7 +63,9 @@ function windowZ(all: AllSeries, tFrom: string, tTo: string): Z {
     ["cpiYoy", d(cpiYoyPts), 1],
     ["usdkrw", d(all.usdkrw.points), 100],
     ["kospiPct", pct(all.kospi.points), 10],
+    ["worldPct", pct(all.usStock.points), 10],
     ["housePct", pct(all.housePrice.points), 3],
+    ["jeonsePct", pct(all.jeonse.points), 3],
   ];
   const z: Z = {};
   for (const [k, delta, scale] of raw)
@@ -185,7 +187,8 @@ export default async function MatrixPage() {
         </Card>
         <Note>
           점수 = 50 × Σ(민감도 × 정규화 방향). 시나리오 열은 방향(±1)만 가정한 이론값이고 &lsquo;지금&rsquo;
-          열은 실제 변화 크기를 반영한다. KOSPI·주택가격은 시나리오에서 중립(0)으로 둔다.
+          열은 실제 변화 크기를 반영한다. KOSPI·미국 주가·주택·전세가격은 시나리오에서 중립(0)으로
+          둔다.
         </Note>
       </section>
 
@@ -253,10 +256,11 @@ export default async function MatrixPage() {
         <SectionTitle title="점수 모델 전문" sub="해석 투명성을 위한 가정 공개" />
         <Card>
           <ol className="list-decimal space-y-1.5 pl-4 text-xs leading-relaxed text-muted">
-            <li>요인: 기준금리·국고채(3년)·주담대·신용대출·정기예금 금리, CPI 전년비, 원/달러, KOSPI·주택가격 변화율.</li>
-            <li>각 요인의 3개월 변화를 대표 척도(금리 ±0.5%p, 물가 ±1%p, 환율 ±100원, 주식 ±10%, 집값 ±3%)로 나눠 ±2로 자른 정규값 z를 만든다.</li>
+            <li>요인: 기준금리·국고채(3년)·주담대·신용대출·정기예금 금리, CPI 전년비, 원/달러, KOSPI·미국 주가(글로벌 주식 대리)·주택매매가·주택전세가 변화율.</li>
+            <li>각 요인의 3개월 변화를 대표 척도(금리 ±0.5%p, 물가 ±1%p, 환율 ±100원, 주식 ±10%, 집값·전세가 ±3%)로 나눠 ±2로 자른 정규값 z를 만든다.</li>
             <li>가계 유형별 민감도(부호·크기)를 정의하고 점수 = 50 × Σ(민감도 × z), −100~+100으로 자른다. ±20을 넘어야 이득/손해로 판정.</li>
-            <li>민감도는 경제적 직관(금리 상승 → 변동금리 차입자 손해, 환율 상승 → 해외투자자 이득 · 수입소비자 손해 등)에 기반한 설계값이며 임의 보정 대상이다.</li>
+            <li>민감도는 경제적 직관(금리 상승 → 변동금리 차입자 손해, 환율·미국 주가 상승 → 해외투자자 이득, 환율 상승 → 수입소비자 손해, 전세가 상승 → 전세족 손해, 집값 상승 → 무주택 대기자 손해, 물가 상승 → 고정소득 은퇴자 손해 등)에 기반한 설계값이며 임의 보정 대상이다.</li>
+            <li>점수는 상대적 방향 지표다 — 고정금리 차입자의 &lsquo;이득&rsquo;은 금리 상승으로 수익이 생긴다는 뜻이 아니라 월 납입액이 고정돼 상대적으로 방어적이라는 뜻이고, 채권 평가손은 만기 보유 시 실현손과 다르다.</li>
           </ol>
         </Card>
       </section>

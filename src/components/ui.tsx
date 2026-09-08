@@ -88,6 +88,7 @@ export function PersonaCard({ ps }: { ps: PersonaScore }) {
         </span>
       </div>
       <p className="mt-1 text-xs text-muted">{ps.persona.oneLine}</p>
+      <p className="mt-1.5 text-xs leading-relaxed text-dim">{ps.persona.desc}</p>
       <div className="relative mt-3 h-1.5 rounded-full bg-inset">
         <div className="absolute inset-y-0 left-1/2 w-px bg-mid" />
         <div

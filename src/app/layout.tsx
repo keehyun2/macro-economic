@@ -5,10 +5,43 @@ import { Nav } from "@/components/Nav";
 import { ThemeProvider, ThemeToggle } from "@/components/ThemeProvider";
 import "./globals.css";
 
+// 카카오톡 등 링크 미리보기(og:image)는 절대 URL이 필요하다.
+// Vercel 빌드 시 VERCEL_PROJECT_PRODUCTION_URL이, 로컬에서는 localhost가 기본값.
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : "http://localhost:3000");
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "가계금융 레이더 — 영끌·빚투 부담 지표",
   description:
     "한국은행 경제통계시스템(ECOS) 공식 통계로 보는 영끌족·빚투족·예금족의 이자 부담·수익과 금융시장 상황별 이득·손해.",
+  openGraph: {
+    type: "website",
+    locale: "ko_KR",
+    url: "/",
+    siteName: "가계금융 레이더",
+    title: "가계금융 레이더 — 영끌·빚투 부담 지표",
+    description:
+      "한국은행 경제통계시스템(ECOS) 공식 통계로 보는 영끌족·빚투족·예금족의 이자 부담·수익과 금융시장 상황별 이득·손해.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "가계금융 레이더 — 영끌·빚투·예금 부담 지표",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "가계금융 레이더 — 영끌·빚투 부담 지표",
+    description:
+      "한국은행 경제통계시스템(ECOS) 공식 통계로 보는 영끌족·빚투족·예금족의 이자 부담·수익과 금융시장 상황별 이득·손해.",
+    images: ["/og-image.png"],
+  },
 };
 
 // 첫 페인트 전에 저장된 테마를 <html>에 반영해 화이트 테마에서 다크 플래시가 나지 않게 한다.
@@ -31,7 +64,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   영끌·빚투·예금 부담 지표
                 </span>
               </Link>
-              <div className="ml-auto flex items-center gap-2">
+              {/* min-w-0: 모바일에서 nav(overflow-x-auto)가 부모 폭보다 커도
+                  그룹이 수축할 수 있게 해 페이지 가로 스크롤을 막는다. */}
+              <div className="ml-auto flex min-w-0 items-center gap-2">
                 <Nav />
                 <ThemeToggle />
               </div>

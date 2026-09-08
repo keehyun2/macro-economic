@@ -13,7 +13,9 @@ export type FactorKey =
   | "cpiYoy"
   | "usdkrw"
   | "kospiPct"
-  | "housePct";
+  | "worldPct"
+  | "housePct"
+  | "jeonsePct";
 
 export interface FactorDef {
   key: FactorKey;
@@ -34,7 +36,9 @@ export const FACTOR_DEFS: FactorDef[] = [
   { key: "cpiYoy", label: "물가 상승률(CPI 전년비)", scale: 1, scaleLabel: "±1%p" },
   { key: "usdkrw", label: "원/달러 환율", scale: 100, scaleLabel: "±100원" },
   { key: "kospiPct", label: "KOSPI(3개월)", scale: 10, scaleLabel: "±10%", isChange: true },
+  { key: "worldPct", label: "미국 주가(3개월)", scale: 10, scaleLabel: "±10%", isChange: true },
   { key: "housePct", label: "주택매매가(3개월)", scale: 3, scaleLabel: "±3%", isChange: true },
+  { key: "jeonsePct", label: "주택전세가(3개월)", scale: 3, scaleLabel: "±3%", isChange: true },
 ];
 
 export interface FactorState {
@@ -52,7 +56,9 @@ const STEPS = 3; // 분기별 계열이 없으므로 3개월 칼로 통일
 export function computeFactors(all: AllSeries): Record<FactorKey, FactorState> {
   const cpiYoy = yoySeries(all.cpi.points);
   const kospi3m = pctChangeSeries(all.kospi.points, STEPS);
+  const usStock3m = pctChangeSeries(all.usStock.points, STEPS);
   const house3m = pctChangeSeries(all.housePrice.points, STEPS);
+  const jeonse3m = pctChangeSeries(all.jeonse.points, STEPS);
 
   const raw: Record<FactorKey, { pts: Point[]; isChange: boolean }> = {
     baseRate: { pts: all.baseRate.points, isChange: false },
@@ -63,7 +69,9 @@ export function computeFactors(all: AllSeries): Record<FactorKey, FactorState> {
     cpiYoy: { pts: cpiYoy, isChange: false },
     usdkrw: { pts: all.usdkrw.points, isChange: false },
     kospiPct: { pts: kospi3m, isChange: true },
+    worldPct: { pts: usStock3m, isChange: true },
     housePct: { pts: house3m, isChange: true },
+    jeonsePct: { pts: jeonse3m, isChange: true },
   };
 
   const out = {} as Record<FactorKey, FactorState>;
@@ -102,7 +110,7 @@ export function cpiYoySeries(all: AllSeries): Point[] {
   return yoySeries(all.cpi.points);
 }
 
-/** 실질금리 = 명목 − CPI 전년동월비. */
+/** 세전 실질 스프레드 = 명목 − CPI 전년동월비 (단순 비교 — 세금·기대물가·복리 미반영). */
 export function realRateSeries(nominal: Point[], cpi: Point[]): Point[] {
   return diffSeries(nominal, yoySeries(cpi));
 }
