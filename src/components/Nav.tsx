@@ -24,8 +24,8 @@ export function Nav() {
             href={l.href}
             className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-sm transition-colors ${
               active
-                ? "bg-slate-800 font-medium text-slate-100"
-                : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
+                ? "bg-inset font-medium text-strong"
+                : "text-muted hover:bg-hover hover:text-soft"
             }`}
           >
             {l.label}

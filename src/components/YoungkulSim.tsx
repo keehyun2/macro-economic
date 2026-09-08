@@ -74,7 +74,7 @@ export function YoungkulSim({
           }
         />
         <div className="mb-4 flex flex-wrap items-center gap-4">
-          <label className="flex items-center gap-3 text-sm text-slate-300">
+          <label className="flex items-center gap-3 text-sm text-soft">
             대출 원금
             <input
               type="range"
@@ -89,7 +89,7 @@ export function YoungkulSim({
               {fmtNum(principalEok, 1)}억원
             </span>
           </label>
-          <span className="rounded-full border border-slate-700 px-2.5 py-0.5 text-xs text-slate-400">
+          <span className="rounded-full border border-line-strong px-2.5 py-0.5 text-xs text-muted">
             {product === "var" ? "변동형" : "고정형"} 신규금리 {fmtPct(rateNow)}
           </span>
         </div>
@@ -121,9 +121,9 @@ export function YoungkulSim({
             )}의 2013년 이후 위치`}
           />
           {houseYoY !== null && (
-            <p className="mt-3 text-xs text-slate-400">
+            <p className="mt-3 text-xs text-muted">
               주택매매가격(전국)은 최근 1년{" "}
-              <span className={houseYoY >= 0 ? "text-rose-300" : "text-emerald-300"}>
+              <span className={houseYoY >= 0 ? "text-down" : "text-up"}>
                 {houseYoY > 0 ? "+" : ""}
                 {fmtNum(houseYoY, 1)}%
               </span>{" "}

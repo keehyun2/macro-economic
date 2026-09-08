@@ -74,7 +74,7 @@ export function SaverSim({
           }
         />
         <div className="mb-4 flex flex-wrap items-center gap-4">
-          <label className="flex items-center gap-3 text-sm text-slate-300">
+          <label className="flex items-center gap-3 text-sm text-soft">
             예치 원금
             <input
               type="range"
@@ -89,7 +89,7 @@ export function SaverSim({
               {fmtNum(principalEok * 10000, 0)}만원
             </span>
           </label>
-          <span className="rounded-full border border-slate-700 px-2.5 py-0.5 text-xs text-slate-400">
+          <span className="rounded-full border border-line-strong px-2.5 py-0.5 text-xs text-muted">
             정기예금(1년) 신규금리 {fmtPct(rateNow)}
           </span>
         </div>
@@ -120,9 +120,9 @@ export function SaverSim({
             label={`현재 정기예금(1년) 신규금리 ${fmtPct(rateNow)}의 2012년 이후 위치`}
           />
           {realRate !== null && (
-            <p className="mt-3 text-xs text-slate-400">
+            <p className="mt-3 text-xs text-muted">
               현재 실질예금금리는{" "}
-              <span className={realRate >= 0 ? "text-emerald-300" : "text-rose-300"}>
+              <span className={realRate >= 0 ? "text-up" : "text-down"}>
                 {fmtPp(realRate, 1)}
               </span>{" "}
               —{" "}

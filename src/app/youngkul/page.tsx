@@ -26,8 +26,8 @@ export default async function YoungkulPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-xl font-bold text-slate-100">🏠 영끌족 — 이자 부담의 무게</h1>
-        <p className="mt-1 text-sm text-slate-400">
+        <h1 className="text-xl font-bold text-strong">🏠 영끌족 — 이자 부담의 무게</h1>
+        <p className="mt-1 text-sm text-muted">
           고레버리지로 주택을 산 가계의 부담은 금리에서 출발한다. 공식 통계의 신규취급 금리로
           월 이자를 계산하고, 역사 속 위치와 가계 주택관련대출 규모를 함께 본다.
         </p>

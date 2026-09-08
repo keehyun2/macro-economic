@@ -1,5 +1,73 @@
 @import "tailwindcss";
 
+/*
+ * 테마 토큰 — :root(다크, 기본)와 .light(화이트)에서 실제 값을 교체한다.
+ * 유틸리티(bg-app, text-muted, border-line ...)는 @theme inline이 var()를
+ * 그대로 참조하므로 클래스 변경 없이 두 테마가 함께 동작한다.
+ * 사이트 최소 폰트는 12px(text-xs) — 그보다 작은 크기를 새로 만들지 않는다.
+ */
+@theme inline {
+  --color-app: var(--app);
+  --color-card: var(--card);
+  --color-pop: var(--pop);
+  --color-inset: var(--inset);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-hover: var(--hover);
+  --color-strong: var(--strong);
+  --color-body: var(--body);
+  --color-soft: var(--soft);
+  --color-muted: var(--muted);
+  --color-dim: var(--dim);
+  --color-up: var(--up);
+  --color-down: var(--down);
+  --color-info: var(--info);
+  --color-accent: var(--accent);
+  --color-mid: var(--mid);
+}
+
+:root {
+  color-scheme: dark;
+  --app: #0b1120;
+  --card: rgba(15, 23, 42, 0.6); /* slate-900/60 */
+  --pop: #0f172a; /* slate-900 — 툴팁 등 불투명 배경 */
+  --inset: #1e293b; /* slate-800 — 카드 안의 안쪽 패널 */
+  --line: #1e293b; /* slate-800 */
+  --line-strong: #334155; /* slate-700 */
+  --hover: rgba(30, 41, 59, 0.5); /* slate-800/50 */
+  --strong: #f8fafc;
+  --body: #e2e8f0;
+  --soft: #cbd5e1;
+  --muted: #94a3b8;
+  --dim: #64748b;
+  --up: #34d399; /* emerald-400 */
+  --down: #fb7185; /* rose-400 */
+  --info: #7dd3fc; /* sky-300 */
+  --accent: #fbbf24; /* amber-400 */
+  --mid: #64748b; /* slate-500 */
+}
+
+.light {
+  color-scheme: light;
+  --app: #f8fafc; /* slate-50 */
+  --card: #ffffff;
+  --pop: #ffffff;
+  --inset: #eef2f7;
+  --line: #e2e8f0; /* slate-200 */
+  --line-strong: #cbd5e1; /* slate-300 */
+  --hover: rgba(15, 23, 42, 0.05);
+  --strong: #0f172a; /* slate-900 */
+  --body: #1e293b; /* slate-800 */
+  --soft: #334155; /* slate-700 */
+  --muted: #475569; /* slate-600 */
+  --dim: #64748b; /* slate-500 */
+  --up: #059669; /* emerald-600 */
+  --down: #e11d48; /* rose-600 */
+  --info: #0369a1; /* sky-700 */
+  --accent: #b45309; /* amber-700 */
+  --mid: #94a3b8; /* slate-400 */
+}
+
 body {
   font-family:
     "Pretendard",
@@ -16,12 +84,12 @@ body {
   height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #0b1120;
+  background: var(--app);
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: var(--line-strong);
   border-radius: 5px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: var(--muted);
 }

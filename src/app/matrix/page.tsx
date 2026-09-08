@@ -83,14 +83,14 @@ function cyclesOf(asOf: string) {
 function ScoreCell({ score, highlight }: { score: number; highlight?: boolean }) {
   const tone =
     score >= 20
-      ? "bg-emerald-500/20 text-emerald-300"
+      ? "bg-up/20 text-up"
       : score <= -20
-        ? "bg-rose-500/20 text-rose-300"
-        : "bg-slate-800/60 text-slate-400";
+        ? "bg-down/20 text-down"
+        : "bg-inset text-muted";
   return (
     <td
       className={`px-2 py-2 text-center font-mono text-sm ${tone} ${
-        highlight ? "outline outline-2 outline-amber-400/70" : ""
+        highlight ? "outline outline-2 outline-accent/70" : ""
       }`}
     >
       {score > 0 ? "+" : ""}
@@ -118,8 +118,8 @@ export default async function MatrixPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-xl font-bold text-slate-100">⚖️ 승자·패자 매트릭스</h1>
-        <p className="mt-1 text-sm text-slate-400">
+        <h1 className="text-xl font-bold text-strong">⚖️ 승자·패자 매트릭스</h1>
+        <p className="mt-1 text-sm text-muted">
           같은 시장 움직임이 가계 유형마다 반대 방향으로 작동한다. 현재 상태와 8가지 시나리오에서
           누가 이득이고 누가 손해인지 정렬해 본다.
         </p>
@@ -132,16 +132,16 @@ export default async function MatrixPage() {
             const f = factors[def.key];
             const dir = f.delta === null ? "·" : Math.abs(f.z) < 0.2 ? "→" : f.delta > 0 ? "▲" : "▼";
             const cls =
-              dir === "▲" ? "text-rose-300" : dir === "▼" ? "text-sky-300" : "text-slate-500";
+              dir === "▲" ? "text-down" : dir === "▼" ? "text-info" : "text-dim";
             return (
               <div
                 key={def.key}
-                className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-2 text-xs"
+                className="flex items-center justify-between rounded-lg border border-line bg-card px-3 py-2 text-xs"
               >
-                <span className="text-slate-300">{def.label}</span>
+                <span className="text-soft">{def.label}</span>
                 <span className={`font-mono ${cls}`}>
                   {dir} {factorValueLabel(f)}{" "}
-                  <span className="text-slate-500">({factorDeltaLabel(f)})</span>
+                  <span className="text-dim">({factorDeltaLabel(f)})</span>
                 </span>
               </div>
             );
@@ -157,9 +157,9 @@ export default async function MatrixPage() {
         <Card className="overflow-x-auto">
           <table className="w-full min-w-[760px] border-collapse text-sm">
             <thead>
-              <tr className="text-[11px] text-slate-400">
+              <tr className="text-xs text-muted">
                 <th className="px-2 py-2 text-left font-medium">가계 유형</th>
-                <th className="px-2 py-2 text-center font-medium text-amber-300">지금</th>
+                <th className="px-2 py-2 text-center font-medium text-accent">지금</th>
                 {SCENARIOS.map((s) => (
                   <th key={s.label} className="px-2 py-2 text-center font-medium">
                     {s.label}
@@ -169,10 +169,10 @@ export default async function MatrixPage() {
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.persona.id} className="border-t border-slate-800">
+                <tr key={r.persona.id} className="border-t border-line">
                   <td className="px-2 py-2 whitespace-nowrap">
                     <span className="mr-1.5">{r.persona.emoji}</span>
-                    <span className="text-slate-200">{r.persona.name}</span>
+                    <span className="text-body">{r.persona.name}</span>
                   </td>
                   <ScoreCell score={r.now.score} highlight />
                   {r.cells.map((c, i) => (
@@ -201,35 +201,35 @@ export default async function MatrixPage() {
             const loser = sorted[sorted.length - 1];
             return (
               <Card key={c.label}>
-                <div className="text-sm font-semibold text-slate-100">{c.label}</div>
-                <div className="mt-0.5 font-mono text-[11px] text-slate-500">
+                <div className="text-sm font-semibold text-strong">{c.label}</div>
+                <div className="mt-0.5 font-mono text-xs text-dim">
                   {c.from} → {c.to}
                 </div>
-                <p className="mt-1 text-xs text-slate-400">{c.desc}</p>
+                <p className="mt-1 text-xs text-muted">{c.desc}</p>
                 <div className="mt-3 space-y-1.5">
                   <div className="flex items-center gap-2 text-xs">
-                    <span className="text-emerald-400">🥇 {winner.persona.emoji} {winner.persona.name}</span>
-                    <span className="ml-auto font-mono text-emerald-300">
+                    <span className="text-up">🥇 {winner.persona.emoji} {winner.persona.name}</span>
+                    <span className="ml-auto font-mono text-up">
                       {winner.score > 0 ? "+" : ""}
                       {winner.score}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-xs">
-                    <span className="text-rose-400">🥲 {loser.persona.emoji} {loser.persona.name}</span>
-                    <span className="ml-auto font-mono text-rose-300">{loser.score}</span>
+                    <span className="text-down">🥲 {loser.persona.emoji} {loser.persona.name}</span>
+                    <span className="ml-auto font-mono text-down">{loser.score}</span>
                   </div>
                 </div>
-                <div className="mt-3 border-t border-slate-800 pt-2">
+                <div className="mt-3 border-t border-line pt-2">
                   <div className="flex flex-wrap gap-1">
                     {c.scores.map((s) => (
                       <span
                         key={s.persona.id}
-                        className={`rounded px-1.5 py-0.5 font-mono text-[10px] ${
+                        className={`rounded px-1.5 py-0.5 font-mono text-xs ${
                           s.score >= 20
-                            ? "bg-emerald-500/15 text-emerald-300"
+                            ? "bg-up/15 text-up"
                             : s.score <= -20
-                              ? "bg-rose-500/15 text-rose-300"
-                              : "bg-slate-800 text-slate-500"
+                              ? "bg-down/15 text-down"
+                              : "bg-inset text-dim"
                         }`}
                         title={s.persona.name}
                       >
@@ -252,7 +252,7 @@ export default async function MatrixPage() {
       <section>
         <SectionTitle title="점수 모델 전문" sub="해석 투명성을 위한 가정 공개" />
         <Card>
-          <ol className="list-decimal space-y-1.5 pl-4 text-xs leading-relaxed text-slate-400">
+          <ol className="list-decimal space-y-1.5 pl-4 text-xs leading-relaxed text-muted">
             <li>요인: 기준금리·국고채(3년)·주담대·신용대출·정기예금 금리, CPI 전년비, 원/달러, KOSPI·주택가격 변화율.</li>
             <li>각 요인의 3개월 변화를 대표 척도(금리 ±0.5%p, 물가 ±1%p, 환율 ±100원, 주식 ±10%, 집값 ±3%)로 나눠 ±2로 자른 정규값 z를 만든다.</li>
             <li>가계 유형별 민감도(부호·크기)를 정의하고 점수 = 50 × Σ(민감도 × z), −100~+100으로 자른다. ±20을 넘어야 이득/손해로 판정.</li>

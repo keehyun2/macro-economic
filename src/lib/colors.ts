@@ -1,32 +1,34 @@
 // 시리즈별 차트 색상 (대시보드/하위 페이지 공통).
+// 다크·화이트 두 테마 위에서 모두 읽히는 중간 톤(500~600단계)으로 맞췄다.
 export const COLORS = {
-  baseRate: "#fbbf24", // amber
-  tbond3y: "#94a3b8", // slate
-  mortgage: "#fb7185", // rose
-  mortgageFixed: "#e879f9", // fuchsia
-  mortgageVar: "#fb7185", // rose
-  credit: "#fb923c", // orange
-  deposit: "#38bdf8", // sky
-  cpi: "#34d399", // emerald
-  cpiYoy: "#34d399",
-  usdkrw: "#a78bfa", // violet
-  kospi: "#22d3ee", // cyan
-  housePrice: "#f472b6", // pink
-  hhDebt: "#818cf8", // indigo
-  hhMortgageDebt: "#c084fc", // purple
-  econSentiment: "#facc15", // yellow
+  baseRate: "#f59e0b", // amber-500
+  tbond3y: "#64748b", // slate-500
+  mortgage: "#f43f5e", // rose-500
+  mortgageFixed: "#c026d3", // fuchsia-600
+  mortgageVar: "#f43f5e", // rose-500
+  credit: "#f97316", // orange-500
+  deposit: "#0ea5e9", // sky-500
+  cpi: "#10b981", // emerald-500
+  cpiYoy: "#10b981", // emerald-500
+  usdkrw: "#8b5cf6", // violet-500
+  kospi: "#06b6d4", // cyan-500
+  housePrice: "#ec4899", // pink-500
+  hhDebt: "#6366f1", // indigo-500
+  hhMortgageDebt: "#a855f7", // purple-500
+  econSentiment: "#ca8a04", // yellow-600
   realRate: "#f97316", // orange-500
-  savings: "#2dd4bf", // teal-400
-  mmda: "#94a3b8", // slate-400
-  mortgageOut: "#fda4af", // rose-300
-  cd91: "#a3e635", // lime-400
+  savings: "#14b8a6", // teal-500
+  mmda: "#64748b", // slate-500
+  mortgageOut: "#fb7185", // rose-400
+  cd91: "#65a30d", // lime-600
   corpBond3y: "#d946ef", // fuchsia-500
-  jeonse: "#60a5fa", // blue-400
-  jeonseApt: "#93c5fd", // blue-300
-  ppi: "#86efac", // green-300
+  jeonse: "#3b82f6", // blue-500
+  jeonseApt: "#60a5fa", // blue-400
+  // 소비자물가(emerald)와 색이 겹치지 않도록 보라 계열로 분리.
+  ppi: "#8b5cf6", // violet-500
   bankDeposits: "#0ea5e9", // sky-500
-  leadingIdx: "#fb923c", // orange-400
-  coincidentIdx: "#facc15", // yellow-400
+  leadingIdx: "#f97316", // orange-500
+  coincidentIdx: "#ca8a04", // yellow-600
   m2: "#6366f1", // indigo-500
   currentAccount: "#10b981", // emerald-500
 } as const;

@@ -216,7 +216,7 @@ export default async function DashboardPage() {
         />
         <div className="grid gap-6 md:grid-cols-2">
           <div className="md:col-span-2">
-            <h3 className="mb-1 text-xs font-medium text-slate-300">
+            <h3 className="mb-1 text-xs font-medium text-soft">
               경제심리지수(원계열) — 100 기준, 위=낙관 · 아래=비관
             </h3>
             <Card>
@@ -236,7 +236,7 @@ export default async function DashboardPage() {
             </Card>
           </div>
           <div>
-            <h3 className="mb-1 text-xs font-medium text-slate-300">
+            <h3 className="mb-1 text-xs font-medium text-soft">
               경기종합지수 순환변동치 — 선행 vs 동행 (100 기준)
             </h3>
             <Card>
@@ -262,7 +262,7 @@ export default async function DashboardPage() {
             </Card>
           </div>
           <div>
-            <h3 className="mb-1 text-xs font-medium text-slate-300">M2(광의통화) 전년비 — 유동성</h3>
+            <h3 className="mb-1 text-xs font-medium text-soft">M2(광의통화) 전년비 — 유동성</h3>
             <Card>
               <MultiLineChart
                 height={220}
@@ -274,7 +274,7 @@ export default async function DashboardPage() {
             </Card>
           </div>
           <div>
-            <h3 className="mb-1 text-xs font-medium text-slate-300">
+            <h3 className="mb-1 text-xs font-medium text-soft">
               경상수지 12개월 이동합 — 원화의 기본배경
             </h3>
             <Card>
@@ -289,7 +289,7 @@ export default async function DashboardPage() {
             </Card>
           </div>
           <div>
-            <h3 className="mb-1 text-xs font-medium text-slate-300">
+            <h3 className="mb-1 text-xs font-medium text-soft">
               소비자물가 vs 생산자물가 전년비
             </h3>
             <Card>

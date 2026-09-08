@@ -30,10 +30,10 @@ export default async function DebtInvestPage() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-slate-100">📈 빚투족 — 차입 비용과의 싸움</h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <h1 className="text-xl font-bold text-strong">📈 빚투족 — 차입 비용과의 싸움</h1>
+          <p className="mt-1 text-sm text-muted">
             빌린 돈으로 투자할 때 승부는 자산 수익률이 아니라{' '}
-            <b className="text-slate-200">자산 수익률 − 차입 금리</b>다. 공식 통계로 이 스프레드의
+            <b className="text-body">자산 수익률 − 차입 금리</b>다. 공식 통계로 이 스프레드의
             역사를 본다.
           </p>
         </div>

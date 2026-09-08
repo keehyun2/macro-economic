@@ -32,10 +32,10 @@ export default async function SaverPage() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-slate-100">🏦 예금족 — 물가와의 싸움</h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <h1 className="text-xl font-bold text-strong">🏦 예금족 — 물가와의 싸움</h1>
+          <p className="mt-1 text-sm text-muted">
             예금·적금으로 모으는 가계의 승부처는{' '}
-            <b className="text-slate-200">실질금리 = 예금금리 − 물가상승률</b>이다. 공식 통계로
+            <b className="text-body">실질금리 = 예금금리 − 물가상승률</b>이다. 공식 통계로
             이자가 물가를 이겼던 시절과 진 구간을 본다.
           </p>
         </div>
