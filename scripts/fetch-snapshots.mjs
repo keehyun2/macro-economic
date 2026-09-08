@@ -1,6 +1,7 @@
-// Fetches every series in data/series.json from the Bank of Korea ECOS API and
-// writes data/snapshots.json — the committed fallback the app serves from when a
-// live fetch fails (e.g. ECOS unreachable from the deploy region).
+// Fetches every pipeline series in data/series.json (chipOnly defs are skipped)
+// from the Bank of Korea ECOS API and writes data/snapshots.json — the committed
+// fallback the app serves from when a live fetch fails (e.g. ECOS unreachable
+// from the deploy region).
 // Normalization (TIME → 'YYYY-MM'/'YYYY-Qn', daily → monthly average) mirrors
 // src/lib/ecos.ts; the two must stay in sync.
 //
@@ -85,6 +86,9 @@ function toPoints(def, rows) {
 
 const result = { fetchedAt: new Date().toISOString(), series: {} };
 for (const def of defs) {
+  // chipOnly(display-only daily chips) are skipped: only their latest value is used,
+  // served by live fetch — a monthly-average snapshot can't stand in for it.
+  if (def.chipOnly) continue;
   try {
     const rows = await fetchAllRows(def);
     const points = toPoints(def, rows);

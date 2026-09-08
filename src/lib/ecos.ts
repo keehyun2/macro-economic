@@ -82,3 +82,36 @@ export async function fetchSeriesLive(def: SeriesDef): Promise<Point[] | null> {
     return null; // ECOS 차단/타임아웃 등 — 폴백
   }
 }
+
+// ── 표시 전용 일별 칩 ────────────────────────────────────────────────────────
+// 월 버킷 정규화를 거치지 않으므로 scripts/fetch-snapshots.mjs와의 미러 규칙 대상이
+// 아니며, 스냅샷도 만들지 않는다(월평균 폴백은 당일값을 대신할 수 없으므로 실패 시 숨김).
+
+export interface DailyLatest {
+  t: string; // 'YYYY-MM-DD'
+  v: number;
+  prevV: number | null; // 직전 영업일 값 — 전일 대비 표시용
+}
+
+/** chipOnly 일별 시리즈의 최근 영업일 값. 실패 시 null(칩 숨김). */
+export async function fetchDailyLatest(def: SeriesDef): Promise<DailyLatest | null> {
+  if (!process.env.ECOS_API_KEY) return null;
+  if (def.period !== "D") throw new Error(`fetchDailyLatest requires period D (${def.key})`);
+  const d = new Date(Date.now() - 21 * 86_400_000); // 연휴 대비 3주 창 — 최근 영업일 2개 확보
+  const start = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+  try {
+    const { rows } = await fetchPage({ ...def, start }, 1, 100);
+    const pts = rows
+      .filter((r) => r.DATA_VALUE !== null && r.DATA_VALUE !== "" && Number.isFinite(Number(r.DATA_VALUE)))
+      .sort((a, b) => (a.TIME < b.TIME ? -1 : 1))
+      .map((r) => ({
+        t: `${r.TIME.slice(0, 4)}-${r.TIME.slice(4, 6)}-${r.TIME.slice(6, 8)}`,
+        v: Number(r.DATA_VALUE),
+      }));
+    const last = pts[pts.length - 1];
+    if (!last) return null;
+    return { ...last, prevV: pts.length > 1 ? pts[pts.length - 2].v : null };
+  } catch {
+    return null;
+  }
+}

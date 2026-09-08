@@ -1,7 +1,8 @@
 import { MultiLineChart, SingleAreaChart } from "@/components/charts";
 import { AsOfChip, Card, KpiTile, Note, PersonaCard, SectionTitle } from "@/components/ui";
 import { loadAll, latestAsOf } from "@/lib/data";
-import { SERIES_DEFS } from "@/lib/stat-codes";
+import { fetchDailyLatest } from "@/lib/ecos";
+import { FX_TODAY_DEF, MONTHLY_DEFS } from "@/lib/stat-codes";
 import {
   cpiYoySeries,
   computeFactors,
@@ -28,8 +29,14 @@ function dirOf(
   return (who === "saver") === up ? "good" : "bad";
 }
 
+/** '2026-09-07' → '9/7' — 칩의 당일 환율 기준일 표기. */
+function mmdd(t: string): string {
+  return `${Number(t.slice(5, 7))}/${Number(t.slice(8, 10))}`;
+}
+
 export default async function DashboardPage() {
   const all = await loadAll();
+  const fxToday = await fetchDailyLatest(FX_TODAY_DEF);
   const factors = computeFactors(all);
   const z = currentZ(factors);
   const scores = PERSONAS.map((p) => scorePersona(p, z)).sort((a, b) => b.score - a.score);
@@ -55,9 +62,18 @@ export default async function DashboardPage() {
         <AsOfChip>📊 데이터 시점 {fmtT(asOf)} (지표별 상이 · /data 참조)</AsOfChip>
         <AsOfChip>
           {liveCount > 0
-            ? `🟢 live ${liveCount}/${SERIES_DEFS.length} · ECOS 직접 조회`
+            ? `🟢 live ${liveCount}/${MONTHLY_DEFS.length} · ECOS 직접 조회`
             : "🟡 스냅샷 모드 (ECOS 미응답)"}
         </AsOfChip>
+        {fxToday && (
+          <AsOfChip>
+            💱 원/달러{" "}
+            <span className="font-mono text-soft">{fmtNum(fxToday.v, 1)}원</span>
+            {` · ${mmdd(fxToday.t)} 매매기준율`}
+            {fxToday.prevV !== null &&
+              ` · 전일대비 ${fmtSigned(fxToday.v - fxToday.prevV, 1, "원")}`}
+          </AsOfChip>
+        )}
       </div>
 
       <section>

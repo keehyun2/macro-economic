@@ -1,6 +1,6 @@
 import { AsOfChip, Card, Note, SectionTitle } from "@/components/ui";
 import { loadAll, snapshotFetchedAt } from "@/lib/data";
-import { SERIES_DEFS } from "@/lib/stat-codes";
+import { MONTHLY_DEFS } from "@/lib/stat-codes";
 import { latest } from "@/lib/series";
 import { fmtNum, fmtT } from "@/lib/format";
 
@@ -23,7 +23,7 @@ export default async function DataPage() {
       </div>
 
       <section>
-        <SectionTitle title="사용 통계표" sub={`${SERIES_DEFS.length}개 시계열 — 통계표코드/항목코드까지 전부 공개`} />
+        <SectionTitle title="사용 통계표" sub={`${MONTHLY_DEFS.length}개 시계열 — 통계표코드/항목코드까지 전부 공개`} />
         <Card className="overflow-x-auto">
           <table className="w-full min-w-[720px] border-collapse text-xs">
             <thead>
@@ -37,7 +37,7 @@ export default async function DataPage() {
               </tr>
             </thead>
             <tbody>
-              {SERIES_DEFS.map((def) => {
+              {MONTHLY_DEFS.map((def) => {
                 const s = seriesList[def.key];
                 const last = latest(s?.points ?? []);
                 return (
@@ -76,6 +76,12 @@ export default async function DataPage() {
             </tbody>
           </table>
         </Card>
+        <Note>
+          대시보드 상단의 원/달러 칩은 별도: 일별 통계표{' '}
+          <code className="text-soft">731Y001 / 0000001</code>(3.1.1.1 매매기준율)의 최근
+          영업일값을 월평균 파이프라인 밖에서 조회한다. 위 표의 월평균 환율(731Y004)과
+          기준은 같고 주기만 다르며, 조회 실패 시 스냅샷 폴백 없이 칩이 숨겨진다.
+        </Note>
       </section>
 
       <section>

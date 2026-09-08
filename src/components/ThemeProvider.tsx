@@ -80,8 +80,6 @@ export interface ChartColors {
   axis: string;
   refLine: string;
   refLabel: string;
-  /** 빈 원 마커의 구멍을 채울 배경색(카드 배경과 동일). */
-  dotFill: string;
 }
 
 const CHART_COLORS: Record<Theme, ChartColors> = {
@@ -90,14 +88,12 @@ const CHART_COLORS: Record<Theme, ChartColors> = {
     axis: "#94a3b8",
     refLine: "#475569",
     refLabel: "#f59e0b",
-    dotFill: "#0f172a",
   },
   light: {
     grid: "#e2e8f0",
     axis: "#475569",
     refLine: "#94a3b8",
     refLabel: "#b45309",
-    dotFill: "#ffffff",
   },
 };
 

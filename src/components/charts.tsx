@@ -15,7 +15,6 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  type DotItemDotProps,
 } from "recharts";
 import { useChartColors } from "@/components/ThemeProvider";
 import type { Point } from "@/lib/series";
@@ -32,17 +31,6 @@ export interface RefAreaSpec {
   to: string;
   label: string;
   color?: string;
-}
-
-// 점선 시리즈는 월별 데이터가 길어 마커를 6점(약 반년) 간격으로 뽑아 낸다.
-const DASHED_DOT_EVERY = 6;
-
-/** 점선용 안에 구멍 뚫린(빈) 원 마커 — 카드 배경색으로 채워 링처럼 보인다. */
-function hollowDotFor(color: string, dotFill: string) {
-  return function HollowDot({ index, cx, cy }: DotItemDotProps) {
-    if (index % DASHED_DOT_EVERY !== 0 || cx == null || cy == null) return null;
-    return <circle cx={cx} cy={cy} r={3} fill={dotFill} stroke={color} strokeWidth={1.5} />;
-  };
 }
 
 function tick(t: string): string {
@@ -65,11 +53,14 @@ function TipBox({
   payload,
   label,
   unit,
+  dashedNames,
 }: {
   active?: boolean;
   payload?: { name: string; value: number | null; color: string }[];
   label?: string;
   unit?: string;
+  /** 점선 시리즈 이름 — 툴팁 범례 원을 구멍 뚫린 링으로 그린다. */
+  dashedNames?: ReadonlySet<string>;
 }) {
   if (!active || !payload?.length) return null;
   return (
@@ -79,7 +70,14 @@ function TipBox({
         .filter((p) => p.value !== null && p.value !== undefined)
         .map((p) => (
           <div key={p.name} className="flex items-center gap-2">
-            <span className="inline-block h-2 w-2 rounded-full" style={{ background: p.color }} />
+            <span
+              className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+              style={
+                dashedNames?.has(p.name)
+                  ? { border: `2px solid ${p.color}` }
+                  : { background: p.color }
+              }
+            />
             <span className="text-muted">{p.name}</span>
             <span className="ml-auto font-mono text-strong">
               {typeof p.value === "number" ? p.value.toLocaleString("ko-KR", { maximumFractionDigits: 2 }) : p.value}
@@ -112,13 +110,14 @@ export function MultiLineChart({
   const c = useChartColors();
   const axis = { stroke: c.axis, fontSize: 12 };
   const rows = mergeRows(series);
+  const dashedNames = new Set(series.filter((s) => s.dashed).map((s) => s.name));
   return (
     <ResponsiveContainer width="100%" height={height}>
       <LineChart data={rows} margin={{ top: 8, right: 12, bottom: 0, left: -8 }}>
         <CartesianGrid stroke={c.grid} strokeDasharray="3 3" />
         <XAxis dataKey="t" tick={axis} tickFormatter={tick} minTickGap={48} />
         <YAxis tick={axis} width={52} domain={["auto", "auto"]} />
-        <Tooltip content={<TipBox unit={unit} />} />
+        <Tooltip content={<TipBox unit={unit} dashedNames={dashedNames} />} />
         {legend && <Legend wrapperStyle={{ fontSize: 12, color: "var(--muted)" }} />}
         {refAreas.map((a, i) => (
           <ReferenceArea
@@ -140,13 +139,7 @@ export function MultiLineChart({
             stroke={s.color}
             strokeWidth={1.8}
             strokeDasharray={s.dashed ? "5 3" : undefined}
-            // 점선은 안에 구멍 뚫린(빈) 원 마커로 표시해 실선과 시각적으로 구분한다.
-            dot={s.dashed ? hollowDotFor(s.color, c.dotFill) : false}
-            activeDot={
-              s.dashed
-                ? { r: 4.5, fill: c.dotFill, stroke: s.color, strokeWidth: 2 }
-                : undefined
-            }
+            dot={false}
             connectNulls
             isAnimationActive={false}
           />

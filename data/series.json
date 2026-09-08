@@ -102,6 +102,18 @@
       "source": "3.1.2.1 주요국 통화의 대원화환율"
     },
     {
+      "key": "usdkrwDaily",
+      "label": "원/미국달러 환율(일별)",
+      "short": "원/달러(당일)",
+      "unit": "원",
+      "table": "731Y001",
+      "item": "0000001",
+      "period": "D",
+      "start": "20200101",
+      "source": "3.1.1.1 주요국 통화의 대원화환율(일별)",
+      "chipOnly": true
+    },
+    {
       "key": "kospi",
       "label": "KOSPI(월평균)",
       "short": "KOSPI",
