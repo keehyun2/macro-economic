@@ -56,12 +56,20 @@ export const PERSONAS: Persona[] = [
     sens: { tbond3y: -1.3, baseRate: -0.8, cpiYoy: -0.5 },
   },
   {
-    id: "overseas",
-    emoji: "✈️",
-    name: "해외투자자 · 수입소비자",
-    oneLine: "환율에 노출된 가계",
-    desc: "원화 약세(환율 상승)는 해외투자 평가에 이득, 수입 소비자에겐 손해 — 같은 화살표의 반대 방향.",
+    id: "overseasInvestor",
+    emoji: "🌏",
+    name: "해외투자자",
+    oneLine: "해외 주식·펀드로 투자하는 가계",
+    desc: "원화 약세(환율 상승)는 해외자산의 원화 평가를 끌어올린다. 원화 강세(환율 하락)는 통화 효과로 수익을 깎아먹는다.",
     sens: { usdkrw: 1.2, cpiYoy: -0.2 },
+  },
+  {
+    id: "importConsumer",
+    emoji: "🛒",
+    name: "수입소비자 · 직구족",
+    oneLine: "해외직구·수입품으로 소비하는 가계",
+    desc: "원화 강세(환율 하락)는 직구·수입품을 원화 기준으로 싸게 만든다. 환율 상승은 그대로 지갑 부담이 되고, 수입물가는 소비자물가까지 밀어올린다.",
+    sens: { usdkrw: -1.2, cpiYoy: -0.4 },
   },
 ];
 
